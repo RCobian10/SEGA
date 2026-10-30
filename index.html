@@ -333,7 +333,7 @@ const CONFIG = {
   persona: 'ROSSANA D. RAVINES COBIAN', // nombre tal como está en la hoja HORARIO
   turnos: ['GC','APS'],                 // turnos en los que se hacen las visitas
   maxPorDia: 8,                         // máximo de visitas por día
-  semanasInicio: 14,                    // pestaña "Inicio": gestantes hasta estas semanas
+  semanasInicio: 14,                    // pestaña "Captación": 1ª APN hasta estas semanas
 
   /* Hoja de ADOLESCENTES: su fila de títulos no coincide con los datos,
      por eso las columnas se indican aquí con su letra. */
@@ -396,6 +396,7 @@ function mapHeader(h){
   c.p1=find(s=>s.startsWith('1 VD PUERP')||s.startsWith('1VD PUERP'));
   c.p2=find(s=>s.startsWith('2VD')||s.startsWith('2 VD'));
   c.obs=find(s=>s.startsWith('OBSERVACION'));
+  c.eg1=find(s=>s.startsWith('EG DEL 1'));
   return c;
 }
 /* rows: matriz de la hoja; r0/c0: fila y columna (base 0) donde empieza el rango de la hoja */
@@ -411,7 +412,7 @@ function parseGestSheet(rows,sheet,r0=0,c0=0){
     const r=rows[i]||[];
     const nombre=[g(r,'ap'),g(r,'am'),g(r,'n1'),g(r,'n2')].map(str).filter(Boolean).join(' ').replace(/\s+/g,' ');
     if(!str(g(r,'ap'))||!str(g(r,'n1')))continue;
-    const rec={sheet,row:i+r0+1,nombre,hcl:str(g(r,'hcl')),dni:str(g(r,'dni')),cel:str(g(r,'cel')),dir:str(g(r,'dir')),obs:str(g(r,'obs')),f:{},t:{}};
+    const rec={sheet,row:i+r0+1,eg1:(typeof g(r,'eg1')==='number'?g(r,'eg1'):null),nombre,hcl:str(g(r,'hcl')),dni:str(g(r,'dni')),cel:str(g(r,'cel')),dir:str(g(r,'dir')),obs:str(g(r,'obs')),f:{},t:{}};
     const filled={};
     for(const k of FIELDS){
       const v=g(r,k); if(v==null||str(v)==='')continue;
@@ -1055,17 +1056,29 @@ function viewPartos(C){
     <div class="list">${list.map(row).join('')||'<div class="empty">Ninguna gestante con FPP en este mes</div>'}</div>
     <p class="small">FPP de la hoja; si no coincide con la FUR se usa FUR + 280 días.</p>`;
 }
-/* ---------- Inicio de embarazo (hasta N semanas) ---------- */
+/* ---------- Captación: 1ª APN hasta N semanas ---------- */
+// EG a la fecha de la 1ª atención prenatal = (1ª APN − FUR) / 7
+// si no hay fecha de 1ª APN o FUR, se usa la columna "EG DEL 1 CPN" de la hoja
+const egApn=r=>(r.f.apn!=null&&r.f.fur!=null&&r.f.apn>=r.f.fur)?r.f.apn-r.f.fur:(r.eg1!=null?Math.round(r.eg1*7):null);
+// "hasta las 14 semanas" = 14 semanas completas o menos (incluye 14 s 6 d), igual que la columna EG DEL 1 CPN
+function captadas(C){const N=CONFIG.semanasInicio||14;return gestActivas(C).filter(r=>{const d=egApn(r);return d!=null&&Math.floor(d/7)<=N})}
 function viewInicio(C){
-  const N=CONFIG.semanasInicio||14;
-  const list=gestActivas(C).filter(r=>r.f.parto==null&&r.t.parto==null&&r.f.fur!=null&&T-r.f.fur>=0&&(T-r.f.fur)/7<=N).sort((a,b)=>(T-a.f.fur)-(T-b.f.fur));
-  const nextOf=r=>{const it=C.items.filter(i=>i.r.id===r.id&&i.date!=null).sort((a,b)=>a.date-b.date)[0];return it?`Próxima: <b>${esc(it.rule.label)}</b> ${fmtY(it.date)}`:''};
-  return `<div class="panel"><h2>Gestantes hasta las ${N} semanas</h2><p class="small" style="margin:0"><b>${list.length}</b> gestante(s) en el inicio del embarazo, según la FUR y la fecha de hoy.</p></div>
-    <div class="list">${list.map(r=>{const w=Math.floor((T-r.f.fur)/7),d=(T-r.f.fur)%7;
-      return `<div class="prow"><div class="t"><b>${esc(r.nombre)}</b><span class="st ${w<12?'ok':'late'}">${w} s ${d} d</span></div>
-        <div class="s">FUR <span class="mono">${fmtY(r.f.fur)}</span> · FPP <span class="mono">${r.fppCalc!=null?fmtY(r.fppCalc):'—'}</span> · 1ª APN <span class="mono">${r.f.apn!=null?fmtY(r.f.apn):'—'}</span></div>
-        <div class="s">${r.f.vd!=null?`<span class="st ok">1ª VD ${fmtY(r.f.vd)}</span>`:'<span class="st overdue">Sin 1ª VD</span>'} ${nextOf(r)}</div>
-        <div class="s">${r.dir?esc(r.dir):'<i>Sin dirección</i>'} · <span class="mono">${r.cel?esc(r.cel):'<i>Sin celular</i>'}</span> · <button class="linkbtn" data-edit="${esc(r.id)}">Editar datos</button></div></div>`}).join('')||'<div class="empty">Ninguna gestante con '+N+' semanas o menos</div>'}</div>`;
+  const N=CONFIG.semanasInicio||14, G=gestActivas(C);
+  const conDato=G.filter(r=>egApn(r)!=null);
+  const list=captadas(C).sort((a,b)=>(b.f.apn||0)-(a.f.apn||0));
+  const sinDato=G.filter(r=>egApn(r)==null);
+  const pct=conDato.length?Math.round(list.length*100/conDato.length):0;
+  const row=r=>{const d=egApn(r),w=Math.floor(d/7),dd=d%7;
+    const etapa=r.f.parto!=null?`<span class="st ok">Parto ${fmtY(r.f.parto)}</span>`:`EG hoy ${egTxt(r)}`;
+    return `<div class="prow"><div class="t"><b>${esc(r.nombre)}</b><span class="st ${w<12?'ok':'late'}">${w} s ${dd} d en la 1ª APN</span></div>
+      <div class="s">1ª APN <span class="mono">${r.f.apn!=null?fmtY(r.f.apn):(r.t.apn?esc(r.t.apn)+' (EG de la hoja)':'—')}</span> · FUR <span class="mono">${r.f.fur!=null?fmtY(r.f.fur):'—'}</span> · FPP <span class="mono">${r.fppCalc!=null?fmtY(r.fppCalc):'—'}</span></div>
+      <div class="s">${etapa} · ${r.f.vd!=null?`<span class="st ok">1ª VD ${fmtY(r.f.vd)}</span>`:'<span class="st overdue">Sin 1ª VD</span>'}</div>
+      <div class="s">${r.dir?esc(r.dir):'<i>Sin dirección</i>'} · <span class="mono">${r.cel?esc(r.cel):'<i>Sin celular</i>'}</span> · <button class="linkbtn" data-edit="${esc(r.id)}">Editar datos</button></div></div>`};
+  return `<div class="panel"><h2>Captadas hasta las ${N} semanas</h2>
+    <p class="small" style="margin:0">Gestantes cuya <b>1ª atención prenatal</b> fue con ${N} semanas o menos (según FUR y fecha de 1ª APN; si falta alguna, se usa la columna EG DEL 1 CPN).</p>
+    <div class="row small"><span><b>${list.length}</b> de ${conDato.length} gestantes (${pct}%)</span>${sinDato.length?`<span>· ${sinDato.length} sin FUR o sin fecha de 1ª APN</span>`:''}</div></div>
+    <div class="list">${list.map(row).join('')||'<div class="empty">Ninguna gestante captada con '+N+' semanas o menos</div>'}</div>
+    ${sinDato.length?`<p class="small">Sin dato para calcular: ${sinDato.map(r=>esc(r.nombre)).join(', ')}.</p>`:''}`;
 }
 const horMeses=h=>(h.months||[]).map(o=>MES[o.m]+' '+o.y).join(', ')||'ninguno';
 function render(){
@@ -1084,8 +1097,8 @@ function render(){
   const nAl=C.items.filter(i=>i.status==='overdue').length+C.alerts.length+S.pending.length;
   const [cy,cm]=ymd(T),f1=dayOf(cy,cm,1),f2=dayOf(cy,cm+1,1)-1,GA=gestActivas(C);
   const nP=GA.filter(r=>r.fppCalc!=null&&r.fppCalc>=f1&&r.fppCalc<=f2).length;
-  const nI=GA.filter(r=>r.f.parto==null&&r.t.parto==null&&r.f.fur!=null&&T-r.f.fur>=0&&(T-r.f.fur)/7<=(CONFIG.semanasInicio||14)).length;
-  const tabs=[['semana','Esta semana',wk],['mes','Mes',''],['partos','Partos del mes',nP],['inicio','≤'+(CONFIG.semanasInicio||14)+' sem',nI],['gest','Personas',C.recs.length-C.excluded.length],['alertas','Alertas',nAl]];
+  const nI=captadas(C).length;
+  const tabs=[['semana','Esta semana',wk],['mes','Mes',''],['partos','Partos del mes',nP],['inicio','Captación ≤'+(CONFIG.semanasInicio||14)+' s',nI],['gest','Personas',C.recs.length-C.excluded.length],['alertas','Alertas',nAl]];
   $('tabs').innerHTML=tabs.map(([id,t,n])=>`<button role="tab" aria-selected="${S.tab===id}" data-tab="${id}">${t}${n!==''?`<span class="n">${n}</span>`:''}</button>`).join('');
   $('view').innerHTML=`<div class="day" style="gap:14px">${S.tab==='semana'?viewSemana(C):S.tab==='mes'?viewMes(C):S.tab==='partos'?viewPartos(C):S.tab==='inicio'?viewInicio(C):S.tab==='gest'?viewGest(C):viewAlertas(C)}</div>`;
   const q=$('q');if(q)q.addEventListener('input',e=>{S.q=e.target.value;const pos=e.target.selectionStart;render();const n=$('q');n.focus();n.setSelectionRange(pos,pos)});
