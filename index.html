@@ -832,8 +832,12 @@ function toast(msg){const t=document.createElement('div');t.className='toast';t.
 function setConn(state,msg){S.conn={state,msg};
   $('connText').innerHTML=`<span class="dot ${state}"></span>${esc(msg)}`;
 }
+// DNI con 8 dígitos (si la hoja lo guardó como número y perdió el 0 inicial)
+const dniTxt=r=>{const d=String(r.dni||'').trim();return /^\d{6,7}$/.test(d)?d.padStart(8,'0'):d};
+const idTxt=r=>`DNI <span class="mono">${dniTxt(r)?esc(dniTxt(r)):'—'}</span> · HCL <span class="mono">${esc(r.hcl||'—')}</span>`;
+const atenAdol=r=>r.f.aten!=null?r.f.aten:r.f.cred1;
 function adolInfo(r,it){
-  const base=r.f.aten!=null?r.f.aten:r.f.cred1;
+  const base=atenAdol(r);
   return `<span class="tag adol">Adolescente${r.edad?' · '+esc(r.edad)+' años':''}</span>${base!=null?`<span>1ª atención <span class="mono">${fmtY(base)}</span></span>`:''}${it&&it.rule.id==='avd2'?`<span>Día 80–90: <span class="mono">${fmt(it.target)}–${fmt(it.deadline)}</span></span>`:''}${r.resp?`<span>Resp.: ${esc(r.resp)}</span>`:''}`;
 }
 const egTxt=(r,d=T)=>{if(r.f.fur==null)return '';const x=d-r.f.fur;if(x<0)return '';return Math.floor(x/7)+' s '+(x%7)+' d'};
@@ -916,7 +920,7 @@ function card(it){
   return `<div class="card ${it.status}">
     <div class="name">${esc(r.nombre)}</div>${btn||'<span></span>'}
     <div class="meta"><span class="tag">${esc(it.rule.label)}</span><span class="st ${it.status}">${ST[it.status]}</span>${sv==='error'?'<span class="st overdue">Sin guardar</span>':''}</div>
-    <div class="meta"><span>${r.dir?esc(r.dir):'<i>Sin dirección</i>'}</span><span class="mono">${r.cel?esc(r.cel):'<i>Sin celular</i>'}</span><span>HCL <span class="mono">${esc(r.hcl||'—')}</span></span><button class="linkbtn" data-edit="${esc(r.id)}">Editar datos</button></div>
+    <div class="meta"><span>${r.dir?esc(r.dir):'<i>Sin dirección</i>'}</span><span class="mono">${r.cel?esc(r.cel):'<i>Sin celular</i>'}</span><span>${idTxt(r)}</span><button class="linkbtn" data-edit="${esc(r.id)}">Editar datos</button></div>
     <div class="meta">
       ${r.tipo==='adol'?adolInfo(r,it):r.f.parto!=null?`<span>Parto <span class="mono">${fmtY(r.f.parto)}</span></span>`:`<span>EG ${egTxt(r)}</span><span>FPP <span class="mono">${r.fppCalc!=null?fmtY(r.fppCalc):'—'}</span></span>`}
       <span>Meta <span class="mono">${fmt(it.target)}</span> · plazo <span class="mono">${fmt(it.deadline)}</span></span>
@@ -937,7 +941,7 @@ function visitedBlock(C,d){
   const v=visitedOn(C,d);window.__V=window.__V||{};v.forEach(x=>window.__V[x.key]=x);
   const t=d===T?'Visitadas hoy':'Visitadas este día';
   return `<div class="visited"><div class="vhead"><b>${t}</b><span class="mono small">${v.length}</span></div>
-    ${v.length?v.map(x=>`<div class="vrow"><div class="vtxt"><b>${esc(x.r.nombre)}</b><span class="small">${esc(x.rule.label)}${x.r.dir?' · '+esc(x.r.dir):''}</span></div>
+    ${v.length?v.map(x=>`<div class="vrow"><div class="vtxt"><b>${esc(x.r.nombre)}</b><span class="small">${esc(x.rule.label)} · ${idTxt(x.r)}${x.r.dir?' · '+esc(x.r.dir):''}</span></div>
       <button class="done-btn delbtn" data-del="${esc(x.key)}"${S.delArmed===x.key?' data-armed="1"':''}>${S.delArmed===x.key?'¿Eliminar? Toca otra vez':'Eliminar'}</button></div>`).join('')
       :`<p class="small" style="margin:0">Todavía no hay visitas registradas ${d===T?'hoy':'ese día'}.</p>`}
   </div>`;
@@ -1017,8 +1021,8 @@ function viewGest(C){
   const nA=act.filter(r=>r.tipo==='adol').length;
   return `<div class="row" role="radiogroup" aria-label="Filtrar">${[['todas','Todas',act.length],['gest','Gestantes',act.length-nA],['adol','Adolescentes',nA]].map(([v,t,n])=>`<button class="done-btn${gf===v?' primary':''}" data-gf="${v}">${t} <span class="mono">${n}</span></button>`).join('')}</div>
   <input type="search" id="q" placeholder="Buscar por nombre, DNI, HCL, celular o dirección" value="${esc(q)}">
-  <div class="list">${list.map(r=>{const n=next[r.id];const etapa=r.tipo==='adol'?`Adolescente${r.edad?' · '+esc(r.edad)+' años':''}${r.resp?' · Resp.: '+esc(r.resp):''}`:r.f.parto!=null?`Puérpera · parto ${fmtY(r.f.parto)}`:`EG ${egTxt(r)} · FPP ${r.fppCalc!=null?fmtY(r.fppCalc):'—'}`;
-    return `<div class="prow"><div class="t"><b>${esc(r.nombre)}</b><span class="mono small">${esc(r.hcl)}</span></div><div class="s">${etapa}</div><div class="s">${r.dir?esc(r.dir):'<i>Sin dirección</i>'} · <span class="mono">${r.cel?esc(r.cel):'<i>Sin celular</i>'}</span> · <button class="linkbtn" data-edit="${esc(r.id)}">Editar datos</button></div><div class="s">${n?`Próxima: <b>${esc(n.rule.label)}</b> el ${WDL[dow(n.date)]} <span class="mono">${fmtY(n.date)}</span>`:'Sin visitas pendientes'}</div></div>`}).join('')||'<div class="empty">Sin resultados</div>'}</div>`;
+  <div class="list">${list.map(r=>{const n=next[r.id];const etapa=r.tipo==='adol'?`Adolescente${r.edad?' · '+esc(r.edad)+' años':''} · 1ª atención <span class="mono">${atenAdol(r)!=null?fmtY(atenAdol(r)):'—'}</span>${r.resp?' · Resp.: '+esc(r.resp):''}`:r.f.parto!=null?`Puérpera · parto ${fmtY(r.f.parto)}`:`EG ${egTxt(r)} · FPP ${r.fppCalc!=null?fmtY(r.fppCalc):'—'}`;
+    return `<div class="prow"><div class="t"><b>${esc(r.nombre)}</b></div><div class="s">${idTxt(r)}</div><div class="s">${etapa}</div><div class="s">${r.dir?esc(r.dir):'<i>Sin dirección</i>'} · <span class="mono">${r.cel?esc(r.cel):'<i>Sin celular</i>'}</span> · <button class="linkbtn" data-edit="${esc(r.id)}">Editar datos</button></div><div class="s">${n?`Próxima: <b>${esc(n.rule.label)}</b> el ${WDL[dow(n.date)]} <span class="mono">${fmtY(n.date)}</span>`:'Sin visitas pendientes'}</div></div>`}).join('')||'<div class="empty">Sin resultados</div>'}</div>`;
 }
 function viewAlertas(C){
   const ov=C.items.filter(i=>i.status==='overdue').sort((a,b)=>a.deadline-b.deadline);
@@ -1026,16 +1030,16 @@ function viewAlertas(C){
   const recById=Object.fromEntries(C.recs.map(r=>[r.id,r]));
   const ruleById=Object.fromEntries(rules().map(r=>[r.id,r]));
   const sec=(t,body)=>`<section class="day"><div class="dayhead"><h2>${t}</h2></div>${body}</section>`;
-  const prow=(name,s)=>`<div class="prow"><b>${esc(name)}</b><div class="s">${s}</div></div>`;
+  const prow=(x,s)=>typeof x==='string'?`<div class="prow"><b>${esc(x)}</b><div class="s">${s}</div></div>`:`<div class="prow"><b>${esc(x.nombre)}</b><div class="s">${idTxt(x)}</div><div class="s">${s}</div></div>`;
   const local=Object.entries(S.done);
   return [
     S.pending.length?sec(`Sin guardar en la hoja (${S.pending.length})`,`<div class="list">${S.pending.map(p=>prow(p.label,p.del?`eliminar la visita del <span class="mono">${fmtY(p.day)}</span>`:p.day!=null?`hecha el <span class="mono">${fmtY(p.day)}</span>`:'cambio de celular/dirección')).join('')}</div><div class="row"><button class="primary" data-retry="1">Reintentar guardar</button></div>`):'',
-    sec(`Atrasadas (${ov.length})`,ov.length?`<div class="list">${ov.map(i=>prow(i.r.nombre,`${esc(i.rule.label)} · plazo vencido el <span class="mono">${fmtY(i.deadline)}</span> · ${i.date!=null?`reprogramada al <span class="mono">${fmtY(i.date)}</span>`:'sin día libre en el horario cargado'}`)).join('')}</div>`:'<div class="empty">Nada atrasado</div>'),
-    (()=>{const nh=C.items.filter(i=>i.status==='nohor').sort((a,b)=>a.target-b.target);return nh.length?sec(`Esperan el horario del mes siguiente (${nh.length})`,`<p class="small">Se programarán solas cuando agregues ese mes en la hoja HORARIO.</p><div class="list">${nh.map(i=>prow(i.r.nombre,`${esc(i.rule.label)} · meta <span class="mono">${fmtY(i.target)}</span> · plazo <span class="mono">${fmtY(i.deadline)}</span>`)).join('')}</div>`):''})(),
-    late.length?sec(`Fuera de plazo por falta de días (${late.length})`,`<div class="list">${late.map(i=>prow(i.r.nombre,`${esc(i.rule.label)} · plazo <span class="mono">${fmtY(i.deadline)}</span>, primer día libre <span class="mono">${i.date!=null?fmtY(i.date):'ninguno'}</span>`)).join('')}</div>`):'',
-    sec(`Revisar en la hoja (${C.alerts.length})`,C.alerts.length?`<div class="list">${C.alerts.map(a=>prow(a.r.nombre,`${esc(a.msg)} · hoja ${esc(a.r.sheet)}, fila ${a.r.row}`)).join('')}</div>`:'<div class="empty">Sin observaciones</div>'),
+    sec(`Atrasadas (${ov.length})`,ov.length?`<div class="list">${ov.map(i=>prow(i.r,`${esc(i.rule.label)} · plazo vencido el <span class="mono">${fmtY(i.deadline)}</span> · ${i.date!=null?`reprogramada al <span class="mono">${fmtY(i.date)}</span>`:'sin día libre en el horario cargado'}`)).join('')}</div>`:'<div class="empty">Nada atrasado</div>'),
+    (()=>{const nh=C.items.filter(i=>i.status==='nohor').sort((a,b)=>a.target-b.target);return nh.length?sec(`Esperan el horario del mes siguiente (${nh.length})`,`<p class="small">Se programarán solas cuando agregues ese mes en la hoja HORARIO.</p><div class="list">${nh.map(i=>prow(i.r,`${esc(i.rule.label)} · meta <span class="mono">${fmtY(i.target)}</span> · plazo <span class="mono">${fmtY(i.deadline)}</span>`)).join('')}</div>`):''})(),
+    late.length?sec(`Fuera de plazo por falta de días (${late.length})`,`<div class="list">${late.map(i=>prow(i.r,`${esc(i.rule.label)} · plazo <span class="mono">${fmtY(i.deadline)}</span>, primer día libre <span class="mono">${i.date!=null?fmtY(i.date):'ninguno'}</span>`)).join('')}</div>`):'',
+    sec(`Revisar en la hoja (${C.alerts.length})`,C.alerts.length?`<div class="list">${C.alerts.map(a=>prow(a.r,`${esc(a.msg)} · hoja ${esc(a.r.sheet)}, fila ${a.r.row}`)).join('')}</div>`:'<div class="empty">Sin observaciones</div>'),
     local.length?sec(`Marcadas solo en este celular (${local.length})`,`<p class="small">Se marcaron con datos de ejemplo; no están en la hoja.</p><div class="list">${local.map(([k,d])=>{const i=k.lastIndexOf('|');const r=recById[k.slice(0,i)];const ru=ruleById[k.slice(i+1)];return `<div class="prow"><div class="t"><b>${esc(r?r.nombre:k)}</b><button class="done-btn" data-undo="${esc(k)}">Deshacer</button></div><div class="s">${esc(ru?ru.label:'')} · <span class="mono">${fmtY(d)}</span></div></div>`}).join('')}</div>`):'',
-    sec(`No se programan (${C.excluded.length})`,C.excluded.length?`<div class="list">${C.excluded.map(e=>prow(e.r.nombre,`Dice “${esc(e.why.toLowerCase())}” en el registro`)).join('')}</div>`:'<div class="empty">Ninguna</div>')
+    sec(`No se programan (${C.excluded.length})`,C.excluded.length?`<div class="list">${C.excluded.map(e=>prow(e.r,`Dice “${esc(e.why.toLowerCase())}” en el registro`)).join('')}</div>`:'<div class="empty">Ninguna</div>')
   ].join('');
 }
 
@@ -1050,7 +1054,7 @@ function viewPartos(C){
     const p=r.f.parto!=null?`<span class="st ok">Parto ${fmtY(r.f.parto)}</span>`:r.t.parto!=null?`<span class="st ok">${esc(r.t.parto)}</span>`:r.fppCalc<T?`<span class="st overdue">FPP pasada, sin parto anotado</span>`:`<span class="st fixed">Pendiente</span>`;
     return `<div class="prow"><div class="t"><b>${esc(r.nombre)}</b><span class="small">FPP <span class="mono">${WD[dow(r.fppCalc)]} ${fmtY(r.fppCalc)}</span></span></div>
       <div class="s">${p} ${r.f.parto==null?`· EG ${egTxt(r)}`:''}</div>
-      <div class="s">${r.dir?esc(r.dir):'<i>Sin dirección</i>'} · <span class="mono">${r.cel?esc(r.cel):'<i>Sin celular</i>'}</span> · HCL <span class="mono">${esc(r.hcl||'—')}</span> · <button class="linkbtn" data-edit="${esc(r.id)}">Editar datos</button></div></div>`};
+      <div class="s">${r.dir?esc(r.dir):'<i>Sin dirección</i>'} · <span class="mono">${r.cel?esc(r.cel):'<i>Sin celular</i>'}</span> · ${idTxt(r)} · <button class="linkbtn" data-edit="${esc(r.id)}">Editar datos</button></div></div>`};
   return `<div class="panel"><div class="row" style="justify-content:space-between"><button data-pnav="-1" aria-label="Mes anterior">‹</button><h2>Partos de ${MES[m]} ${y}</h2><button data-pnav="1" aria-label="Mes siguiente">›</button></div>
     <div class="row small"><span><b>${list.length}</b> con FPP este mes</span>·<span><b>${nac}</b> ya dieron a luz</span>·<span style="color:var(--bad)"><b>${venc}</b> FPP pasada sin parto</span></div></div>
     <div class="list">${list.map(row).join('')||'<div class="empty">Ninguna gestante con FPP en este mes</div>'}</div>
@@ -1071,6 +1075,7 @@ function viewInicio(C){
   const row=r=>{const d=egApn(r),w=Math.floor(d/7),dd=d%7;
     const etapa=r.f.parto!=null?`<span class="st ok">Parto ${fmtY(r.f.parto)}</span>`:`EG hoy ${egTxt(r)}`;
     return `<div class="prow"><div class="t"><b>${esc(r.nombre)}</b><span class="st ${w<12?'ok':'late'}">${w} s ${dd} d en la 1ª APN</span></div>
+      <div class="s">${idTxt(r)}</div>
       <div class="s">1ª APN <span class="mono">${r.f.apn!=null?fmtY(r.f.apn):(r.t.apn?esc(r.t.apn)+' (EG de la hoja)':'—')}</span> · FUR <span class="mono">${r.f.fur!=null?fmtY(r.f.fur):'—'}</span> · FPP <span class="mono">${r.fppCalc!=null?fmtY(r.fppCalc):'—'}</span></div>
       <div class="s">${etapa} · ${r.f.vd!=null?`<span class="st ok">1ª VD ${fmtY(r.f.vd)}</span>`:'<span class="st overdue">Sin 1ª VD</span>'}</div>
       <div class="s">${r.dir?esc(r.dir):'<i>Sin dirección</i>'} · <span class="mono">${r.cel?esc(r.cel):'<i>Sin celular</i>'}</span> · <button class="linkbtn" data-edit="${esc(r.id)}">Editar datos</button></div></div>`};

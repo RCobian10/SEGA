@@ -1,6 +1,6 @@
 // Agenda VD Gestantes · service worker
 // Guarda la app para abrirla rápido y sin internet. Los datos de la hoja NO se guardan aquí.
-const VERSION = 'agenda-vd-v11';
+const VERSION = 'agenda-vd-v12';
 const SHELL = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png', './icon-maskable-512.png', './apple-touch-icon.png', './favicon-32.png'];
 
 self.addEventListener('install', e => {
