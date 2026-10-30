@@ -7,8 +7,8 @@
 <meta name="theme-color" content="#8a2f62">
 <meta name="description" content="Visitas domiciliarias a gestantes y puérperas según el horario del establecimiento">
 <link rel="manifest" href="manifest.webmanifest">
-<link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
-<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Agenda VD">
@@ -310,6 +310,8 @@ input[type=password]{font:inherit;color:var(--ink);background:var(--bg);border:1
       <b>App</b>
       <div class="row"><button id="btnInstall" class="primary" hidden>Instalar app</button></div>
       <p class="small" id="installHint" style="margin:0"></p>
+      <div class="row"><button id="btnCheck">Revisar instalación</button></div>
+      <div class="small" id="checkOut"></div>
       <div class="row"><button id="clearAll">Borrar datos de este celular</button></div>
     </div>
   </section>
@@ -330,6 +332,8 @@ const CONFIG = {
   url: '',                              // https://script.google.com/macros/s/…/exec
   persona: 'ROSSANA D. RAVINES COBIAN', // nombre tal como está en la hoja HORARIO
   turnos: ['GC','APS'],                 // turnos en los que se hacen las visitas
+  maxPorDia: 8,                         // máximo de visitas por día
+  semanasInicio: 14,                    // pestaña "Inicio": gestantes hasta estas semanas
 
   /* Hoja de ADOLESCENTES: su fila de títulos no coincide con los datos,
      por eso las columnas se indican aquí con su letra. */
@@ -591,9 +595,11 @@ const MES=['enero','febrero','marzo','abril','mayo','junio','julio','agosto','se
 const fmt=d=>{const [,m,dd]=ymd(d);return String(dd).padStart(2,'0')+'/'+String(m+1).padStart(2,'0')};
 const fmtY=d=>fmt(d)+'/'+ymd(d)[0];
 const T=todayDay();
-let S={data:null,settings:{person:'',codes:null,cap:4,skip:null,rules:null,url:'',pin:''},done:{},pending:[],tab:'semana',calMonth:null,selDay:T,saving:{},conn:{state:'off',msg:'Sin conectar'},err:''};
+let S={data:null,settings:{person:'',codes:null,cap:null,skip:null,rules:null,url:'',pin:''},done:{},pending:[],tab:'semana',calMonth:null,selDay:T,saving:{},conn:{state:'off',msg:'Sin conectar'},err:''};
 try{const s=JSON.parse(localStorage.getItem(LS)||'null');if(s){S.data=s.data||null;Object.assign(S.settings,s.settings||{});S.done=s.done||{};S.pending=s.pending||[]}}catch(e){}
 function save(){try{localStorage.setItem(LS,JSON.stringify({data:S.data,settings:S.settings,done:S.done,pending:S.pending}))}catch(e){}}
+// máximo por día: el de CONFIG, salvo que se haya cambiado a mano en Configuración
+const capDia=()=>Math.max(1,+(S.settings.capSet?S.settings.cap:CONFIG.maxPorDia)||8);
 const rules=()=>{const rs=S.settings.rules||DEFAULT_RULES.map(r=>({...r}));
   // reglas guardadas de versiones anteriores: completar las nuevas y actualizar la 2ª visita de adolescentes
   for(const d of DEFAULT_RULES){const i=rs.findIndex(x=>x.id===d.id);if(i<0)rs.push({...d});else if(d.id==='avd2'&&rs[i].base!==d.base)rs[i]={...d}}
@@ -814,7 +820,7 @@ function compute(){
   if(S.settings.adolOff)adol=[];
   const A=buildAdol(adol,rules(),T,S.done,CONFIG.adol);
   items.push(...A.items);excluded.push(...A.excluded);recs.push(...adol);
-  schedule(items,avail,Math.max(1,+S.settings.cap||4),T);
+  schedule(items,avail,capDia(),T);
   return {D,recs,items,alerts,excluded,avail,present,codes,person};
 }
 
@@ -841,7 +847,7 @@ function renderCfg(C){
   const ps=$('person');
   ps.innerHTML='<option value="">— Elige tu nombre —</option>'+D.horario.people.map(p=>`<option value="${esc(p.name)}"${p.name===C.person?' selected':''}>${esc(p.name)} · ${esc(p.prof)}</option>`).join('');
   ps.disabled=D.demo;
-  $('cap').value=S.settings.cap;
+  $('cap').value=capDia();
   $('adolResp').value=S.settings.adolOff?'off':(S.settings.adolResp||'todos');
   $('codes').innerHTML=C.present.length?C.present.filter(c=>c!=='VAC').map(c=>`<label class="chip"><input type="checkbox" value="${esc(c)}"${C.codes.includes(c)?' checked':''}>${esc(c)}</label>`).join(''):'<span class="small">Elige tu nombre para ver tus turnos.</span>';
   const skip=S.settings.skip||[];
@@ -850,7 +856,7 @@ function renderCfg(C){
 }
 $('person').addEventListener('change',e=>{S.settings.person=e.target.value;S.settings.codes=null;save();render()});
 $('adolResp').addEventListener('change',e=>{const v=e.target.value;S.settings.adolOff=v==='off';S.settings.adolResp=v==='mios'?'mios':'todos';save();render()});
-$('cap').addEventListener('change',e=>{S.settings.cap=Math.max(1,+e.target.value||1);save();render()});
+$('cap').addEventListener('change',e=>{S.settings.cap=Math.max(1,+e.target.value||1);S.settings.capSet=true;save();render()});
 $('codes').addEventListener('change',()=>{S.settings.codes=[...$('codes').querySelectorAll('input:checked')].map(i=>i.value);save();render()});
 $('sheets').addEventListener('change',()=>{S.settings.skip=[...$('sheets').querySelectorAll('input:not(:checked)')].map(i=>i.value);save();render()});
 $('rules').addEventListener('change',e=>{const i=+e.target.dataset.i,k=e.target.dataset.k;const rs=rules();rs[i][k]=Math.max(0,+e.target.value||0);S.settings.rules=rs;save();render()});
@@ -898,7 +904,7 @@ let clearArmed=false;
 $('clearAll').addEventListener('click',e=>{
   if(!clearArmed){clearArmed=true;e.target.textContent='Toca otra vez para borrar';setTimeout(()=>{clearArmed=false;e.target.textContent='Borrar datos de este celular'},4000);return}
   try{localStorage.removeItem(LS)}catch(_){}
-  S.data=null;S.done={};S.pending=[];S.settings={person:'',codes:null,cap:4,skip:null,rules:null,url:'',pin:''};clearArmed=false;e.target.textContent='Borrar datos de este celular';showGate();toast('Datos borrados');
+  S.data=null;S.done={};S.pending=[];S.settings={person:'',codes:null,cap:null,skip:null,rules:null,url:'',pin:''};clearArmed=false;e.target.textContent='Borrar datos de este celular';showGate();toast('Datos borrados');
 });
 
 function card(it){
@@ -1032,6 +1038,35 @@ function viewAlertas(C){
   ].join('');
 }
 
+/* ---------- Partos del mes ---------- */
+function gestActivas(C){return C.recs.filter(r=>r.tipo!=='adol'&&!C.excluded.some(e=>e.r===r))}
+function viewPartos(C){
+  if(!S.pMonth){const [y,m]=ymd(T);S.pMonth={y,m}}
+  const {y,m}=S.pMonth, first=dayOf(y,m,1), last=dayOf(y,m+1,1)-1;
+  const list=gestActivas(C).filter(r=>r.fppCalc!=null&&r.fppCalc>=first&&r.fppCalc<=last).sort((a,b)=>a.fppCalc-b.fppCalc);
+  const nac=list.filter(r=>r.f.parto!=null||r.t.parto!=null).length, venc=list.filter(r=>r.f.parto==null&&r.t.parto==null&&r.fppCalc<T).length;
+  const row=r=>{
+    const p=r.f.parto!=null?`<span class="st ok">Parto ${fmtY(r.f.parto)}</span>`:r.t.parto!=null?`<span class="st ok">${esc(r.t.parto)}</span>`:r.fppCalc<T?`<span class="st overdue">FPP pasada, sin parto anotado</span>`:`<span class="st fixed">Pendiente</span>`;
+    return `<div class="prow"><div class="t"><b>${esc(r.nombre)}</b><span class="small">FPP <span class="mono">${WD[dow(r.fppCalc)]} ${fmtY(r.fppCalc)}</span></span></div>
+      <div class="s">${p} ${r.f.parto==null?`· EG ${egTxt(r)}`:''}</div>
+      <div class="s">${r.dir?esc(r.dir):'<i>Sin dirección</i>'} · <span class="mono">${r.cel?esc(r.cel):'<i>Sin celular</i>'}</span> · HCL <span class="mono">${esc(r.hcl||'—')}</span> · <button class="linkbtn" data-edit="${esc(r.id)}">Editar datos</button></div></div>`};
+  return `<div class="panel"><div class="row" style="justify-content:space-between"><button data-pnav="-1" aria-label="Mes anterior">‹</button><h2>Partos de ${MES[m]} ${y}</h2><button data-pnav="1" aria-label="Mes siguiente">›</button></div>
+    <div class="row small"><span><b>${list.length}</b> con FPP este mes</span>·<span><b>${nac}</b> ya dieron a luz</span>·<span style="color:var(--bad)"><b>${venc}</b> FPP pasada sin parto</span></div></div>
+    <div class="list">${list.map(row).join('')||'<div class="empty">Ninguna gestante con FPP en este mes</div>'}</div>
+    <p class="small">FPP de la hoja; si no coincide con la FUR se usa FUR + 280 días.</p>`;
+}
+/* ---------- Inicio de embarazo (hasta N semanas) ---------- */
+function viewInicio(C){
+  const N=CONFIG.semanasInicio||14;
+  const list=gestActivas(C).filter(r=>r.f.parto==null&&r.t.parto==null&&r.f.fur!=null&&T-r.f.fur>=0&&(T-r.f.fur)/7<=N).sort((a,b)=>(T-a.f.fur)-(T-b.f.fur));
+  const nextOf=r=>{const it=C.items.filter(i=>i.r.id===r.id&&i.date!=null).sort((a,b)=>a.date-b.date)[0];return it?`Próxima: <b>${esc(it.rule.label)}</b> ${fmtY(it.date)}`:''};
+  return `<div class="panel"><h2>Gestantes hasta las ${N} semanas</h2><p class="small" style="margin:0"><b>${list.length}</b> gestante(s) en el inicio del embarazo, según la FUR y la fecha de hoy.</p></div>
+    <div class="list">${list.map(r=>{const w=Math.floor((T-r.f.fur)/7),d=(T-r.f.fur)%7;
+      return `<div class="prow"><div class="t"><b>${esc(r.nombre)}</b><span class="st ${w<12?'ok':'late'}">${w} s ${d} d</span></div>
+        <div class="s">FUR <span class="mono">${fmtY(r.f.fur)}</span> · FPP <span class="mono">${r.fppCalc!=null?fmtY(r.fppCalc):'—'}</span> · 1ª APN <span class="mono">${r.f.apn!=null?fmtY(r.f.apn):'—'}</span></div>
+        <div class="s">${r.f.vd!=null?`<span class="st ok">1ª VD ${fmtY(r.f.vd)}</span>`:'<span class="st overdue">Sin 1ª VD</span>'} ${nextOf(r)}</div>
+        <div class="s">${r.dir?esc(r.dir):'<i>Sin dirección</i>'} · <span class="mono">${r.cel?esc(r.cel):'<i>Sin celular</i>'}</span> · <button class="linkbtn" data-edit="${esc(r.id)}">Editar datos</button></div></div>`}).join('')||'<div class="empty">Ninguna gestante con '+N+' semanas o menos</div>'}</div>`;
+}
 const horMeses=h=>(h.months||[]).map(o=>MES[o.m]+' '+o.y).join(', ')||'ninguno';
 function render(){
   const C=compute();window.__C=C;const D=C.D;
@@ -1047,13 +1082,17 @@ function render(){
   renderCfg(C);
   const m=byDay(C.items);const wk=Object.keys(m).map(Number).filter(d=>d>=T&&d<T+7).reduce((a,d)=>a+m[d].length,0);
   const nAl=C.items.filter(i=>i.status==='overdue').length+C.alerts.length+S.pending.length;
-  const tabs=[['semana','Esta semana',wk],['mes','Mes',''],['gest','Personas',C.recs.length-C.excluded.length],['alertas','Alertas',nAl]];
+  const [cy,cm]=ymd(T),f1=dayOf(cy,cm,1),f2=dayOf(cy,cm+1,1)-1,GA=gestActivas(C);
+  const nP=GA.filter(r=>r.fppCalc!=null&&r.fppCalc>=f1&&r.fppCalc<=f2).length;
+  const nI=GA.filter(r=>r.f.parto==null&&r.t.parto==null&&r.f.fur!=null&&T-r.f.fur>=0&&(T-r.f.fur)/7<=(CONFIG.semanasInicio||14)).length;
+  const tabs=[['semana','Esta semana',wk],['mes','Mes',''],['partos','Partos del mes',nP],['inicio','≤'+(CONFIG.semanasInicio||14)+' sem',nI],['gest','Personas',C.recs.length-C.excluded.length],['alertas','Alertas',nAl]];
   $('tabs').innerHTML=tabs.map(([id,t,n])=>`<button role="tab" aria-selected="${S.tab===id}" data-tab="${id}">${t}${n!==''?`<span class="n">${n}</span>`:''}</button>`).join('');
-  $('view').innerHTML=`<div class="day" style="gap:14px">${S.tab==='semana'?viewSemana(C):S.tab==='mes'?viewMes(C):S.tab==='gest'?viewGest(C):viewAlertas(C)}</div>`;
+  $('view').innerHTML=`<div class="day" style="gap:14px">${S.tab==='semana'?viewSemana(C):S.tab==='mes'?viewMes(C):S.tab==='partos'?viewPartos(C):S.tab==='inicio'?viewInicio(C):S.tab==='gest'?viewGest(C):viewAlertas(C)}</div>`;
   const q=$('q');if(q)q.addEventListener('input',e=>{S.q=e.target.value;const pos=e.target.selectionStart;render();const n=$('q');n.focus();n.setSelectionRange(pos,pos)});
 }
 document.addEventListener('click',e=>{
-  const t=e.target.closest('[data-tab],[data-done],[data-undo],[data-day],[data-mnav],[data-copy],[data-parto],[data-retry],[data-edit],[data-del],[data-gf]');if(!t)return;
+  const t=e.target.closest('[data-tab],[data-done],[data-undo],[data-day],[data-mnav],[data-copy],[data-parto],[data-retry],[data-edit],[data-del],[data-gf],[data-pnav]');if(!t)return;
+  if(t.dataset.pnav){const c=S.pMonth;let mm=c.m+ +t.dataset.pnav,yy=c.y;if(mm<0){mm=11;yy--}if(mm>11){mm=0;yy++}S.pMonth={y:yy,m:mm};render();return}
   if(t.dataset.gf){S.gfilter=t.dataset.gf;render();return}
   const C=window.__C;
   if(t.dataset.tab){S.tab=t.dataset.tab;render();return}
@@ -1079,6 +1118,20 @@ document.addEventListener('change',e=>{if(e.target.id==='calPerson'){S.calPerson
 // Volver a leer la hoja al regresar a la app (si pasaron más de 2 minutos)
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&ready()&&Date.now()-((S.data&&S.data.loadedAt)||0)>120000)loadSheet()});
 
+/* ---------- Revisión de instalación ---------- */
+$('btnCheck').addEventListener('click',async()=>{
+  const out=[];const ok=(b,t,fix)=>out.push(`${b?'✅':'❌'} ${t}${!b&&fix?` <i>— ${fix}</i>`:''}`);
+  ok(location.protocol==='https:'||location.hostname==='localhost','Página en https','abre la dirección de GitHub Pages (https://…github.io/…)');
+  ok(!/FBAN|FBAV|Instagram|WhatsApp|wv\)/i.test(navigator.userAgent),'Abierta en el navegador (no dentro de WhatsApp/Facebook)','toca ⋮ → "Abrir en Chrome"');
+  let man=null;try{const r=await fetch('manifest.webmanifest',{cache:'no-store'});ok(r.ok,'Archivo manifest.webmanifest','súbelo junto a index.html');if(r.ok)man=await r.json()}catch(_){ok(false,'Archivo manifest.webmanifest','súbelo junto a index.html')}
+  for(const ic of (man&&man.icons)||[{src:'icon-192.png'},{src:'icon-512.png'}]){
+    try{const r=await fetch(ic.src,{cache:'no-store'});ok(r.ok,'Ícono '+ic.src,'súbelo junto a index.html (misma carpeta)')}catch(_){ok(false,'Ícono '+ic.src,'súbelo junto a index.html')}}
+  let sw=false;try{sw=!!(await navigator.serviceWorker.getRegistration())}catch(_){}
+  ok(sw,'sw.js activo','súbelo junto a index.html y recarga la página');
+  ok(true,isStandalone()?'Ya se está usando como app instalada':'Aún no instalada en este navegador');
+  $('checkOut').innerHTML=out.join('<br>');
+});
+
 /* ---------- Instalar como app ---------- */
 let installEvt=null;
 const isStandalone=()=>matchMedia('(display-mode: standalone)').matches||navigator.standalone===true;
@@ -1088,7 +1141,7 @@ function installUI(){
   $('installHint').textContent=isStandalone()?'La app ya está instalada en este celular.'
     :installEvt?'Se instala como una app más: con su ícono y sin la barra del navegador.'
     :ios?'En iPhone: abre esta página en Safari, toca Compartir y luego “Agregar a inicio”.'
-    :'En Android: abre el menú ⋮ de Chrome y elige “Instalar app” o “Agregar a pantalla principal”.';
+    :'En Android: abre la página en Chrome, menú ⋮ → “Instalar app” (si solo aparece “Agregar a pantalla principal”, toca “Revisar instalación”).';
 }
 addEventListener('beforeinstallprompt',e=>{e.preventDefault();installEvt=e;installUI()});
 addEventListener('appinstalled',()=>{installEvt=null;installUI();toast('App instalada')});

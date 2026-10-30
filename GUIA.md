@@ -28,8 +28,13 @@ Son dos archivos:
    index.html
    manifest.webmanifest
    sw.js
-   icons/  (los 6 íconos)
+   icon-192.png
+   icon-512.png
+   icon-maskable-512.png
+   apple-touch-icon.png
+   favicon-32.png
    ```
+   Todos en la misma carpeta (la raíz del repositorio), sin subcarpetas.
    `Codigo.gs` y `GUIA.md` no hacen falta en GitHub.
 2. Activa **Settings → Pages → main / root**.
 3. Opcional: pega la URL `/exec` en `CONFIG.url`, al inicio del script de `index.html`, antes de subirlo. Así solo se pide el PIN.
@@ -41,7 +46,8 @@ Son dos archivos:
 3. Para instalarla:
    - **Android (Chrome):** ⚙ Configuración → **Instalar app**. Si no aparece el botón, usa el menú ⋮ → "Instalar app".
    - **iPhone (Safari):** Compartir → **Agregar a inicio**.
-4. Para salir o cambiar el PIN, entra a ⚙ Configuración → Conexión. Si cambias el PIN en el script, la app pedirá el nuevo en el siguiente uso.
+4. Si se instala sin el ícono (como acceso directo), entra a ⚙ Configuración → **Revisar instalación**: muestra qué archivo falta o qué hay que cambiar.
+5. Para salir o cambiar el PIN, entra a ⚙ Configuración → Conexión. Si cambias el PIN en el script, la app pedirá el nuevo en el siguiente uso.
 
 ## Cómo guarda las visitas
 
@@ -79,6 +85,11 @@ Son dos archivos:
 ## Ver el horario de otra persona
 
 En la pestaña **Mes**, el selector **Ver horario de** muestra el calendario de turnos de cualquier persona de la hoja HORARIO (solo lectura). Al tocar un día, aparece **Personal de turno este día**, agrupado por turno (GC, APS, M, T…).
+
+## Partos del mes e inicio del embarazo
+
+- **Partos del mes:** gestantes con FPP en el mes (con flechas para ver otros meses). Indica si ya dieron a luz, si siguen pendientes o si la FPP pasó sin parto anotado.
+- **≤14 sem:** gestantes que están en las primeras 14 semanas según la FUR, con su FUR, FPP, 1ª APN, si ya tienen la 1ª VD y su próxima visita. El límite de semanas se cambia en `CONFIG.semanasInicio`.
 
 ## Seguridad
 
