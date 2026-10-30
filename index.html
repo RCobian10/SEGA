@@ -5,6 +5,14 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Agenda VD Gestantes</title>
 <meta name="theme-color" content="#8a2f62">
+<meta name="description" content="Visitas domiciliarias a gestantes y puérperas según el horario del establecimiento">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Agenda VD">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=IBM+Plex+Mono:wght@500&display=swap">
 <style>
@@ -98,42 +106,162 @@ select,input[type=number],input[type=search],input[type=text],input[type=url],in
 .prow .s{font-size:.85rem;color:var(--muted)}
 .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(16px + env(safe-area-inset-bottom,0px));background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:999px;font-size:.9rem;z-index:20;max-width:calc(100% - 32px);text-align:center}
 .small{font-size:.82rem;color:var(--muted)}
-.hidefile{position:absolute;width:1px;height:1px;opacity:0}
+.brand{display:flex;align-items:center;gap:10px;min-width:0}
+.brand svg{width:40px;height:40px;flex:none;border-radius:10px}
+.brand h1{font-size:1.35rem;line-height:1.1}
+.iconbtn{width:42px;height:42px;min-height:42px;padding:0;display:inline-grid;place-items:center;border-radius:12px}
+.iconbtn svg{width:22px;height:22px}
+.top{align-items:center;flex-wrap:nowrap}
+.status{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:.85rem;color:var(--muted)}
+#connText{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.status button{min-height:34px;padding:4px 10px;font-size:.85rem}
+.cfghead{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.cfgsec{display:flex;flex-direction:column;gap:8px}
+.cfgsec>b{font-family:var(--f-display);font-weight:600;font-size:1rem}
+hr.sep{border:none;border-top:1px solid var(--line);margin:0}
+.login{min-height:100vh;min-height:100dvh;display:grid;place-items:center;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:24px}
+.login .box{width:100%;max-width:360px;display:flex;flex-direction:column;gap:14px;text-align:center}
+.login .logo svg{width:96px;height:96px;border-radius:24px;box-shadow:0 10px 30px -12px rgba(138,47,98,.6)}
+.login h1{font-size:1.7rem}
+.login form{display:flex;flex-direction:column;gap:10px;text-align:left}
+.login input{font-size:1.2rem;text-align:center;letter-spacing:.3em}
+.login input[type=url]{font-size:.9rem;letter-spacing:0;text-align:left}
+.login .msg{min-height:1.4em;color:var(--bad);font-size:.9rem;text-align:center}
+input[type=password]{font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:8px 10px;min-height:44px;width:100%;min-width:0}
+.sheet-bg{position:fixed;inset:0;background:rgba(20,10,18,.45);z-index:30;display:flex;align-items:flex-end;justify-content:center}
+.sheet{background:var(--surface);color:var(--ink);width:100%;max-width:520px;border-radius:18px 18px 0 0;padding:18px max(16px,env(safe-area-inset-left,0px)) calc(18px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:12px;max-height:92vh;overflow:auto}
+@media (min-width:560px){.sheet-bg{align-items:center}.sheet{border-radius:18px}}
+.sheet h2{font-size:1.15rem}
+.sheet .who{color:var(--muted);font-size:.88rem;margin-top:-6px}
+.sheet input[type=tel],.sheet input[type=text],.sheet input[type=date]{font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:8px 10px;min-height:44px;width:100%;min-width:0}
+.sheet .was{font-size:.78rem;color:var(--muted)}
+.sheet .actions{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap}
+.sheet .actions .primary{flex:1 1 auto}
+.linkbtn{background:none;border:none;color:var(--accent);padding:0;min-height:0;font-size:.85rem;text-decoration:underline;text-underline-offset:2px}
+.visit-btn{font-weight:700;border-color:var(--accent);color:var(--accent)}
+.tag.adol{background:var(--ok-soft);color:var(--ok)}
+.cell .c.big{font-size:.78rem;color:var(--ink);font-weight:500}
+.staff summary{cursor:pointer;font-family:var(--f-display);font-weight:600}
+.staff .sgrp{display:flex;flex-direction:column;gap:2px}
+.staff .sgrp>b{font-family:var(--f-mono)}
+.visited{border:1px solid var(--line);border-radius:12px;background:var(--ok-soft);padding:10px 12px;display:flex;flex-direction:column;gap:8px}
+.visited .vhead{display:flex;justify-content:space-between;align-items:baseline;color:var(--ok)}
+.vrow{display:flex;justify-content:space-between;align-items:center;gap:8px;background:var(--surface);border-radius:10px;padding:8px 10px}
+.vtxt{display:flex;flex-direction:column;min-width:0}
+.vtxt .small{overflow-wrap:anywhere}
+.delbtn{flex:none;color:var(--bad);border-color:var(--bad-soft)}
+.delbtn[data-armed="1"]{background:var(--bad);color:var(--surface);border-color:var(--bad)}
+.cell .dn{font-family:var(--f-mono);font-size:.62rem;color:var(--ok);margin-left:3px}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 </head>
 <body>
-<div class="wrap">
-  <div class="top">
+<section class="login" id="login" hidden>
+  <div class="box">
+    <div class="logo"><svg viewBox="0 0 512 512" aria-hidden="true"><defs><clipPath id="lg0"><rect width="512" height="512" rx="112"/></clipPath></defs><g clip-path="url(#lg0)"><rect width="512" height="512" fill="#8a2f62"/><circle cx="270" cy="250" r="190" fill="#9c3d72"/><g transform="translate(256 256) scale(1) translate(-256 -256)"><g id="fig">
+  <!-- cabello atrás -->
+  <path d="M168 150 C150 220 150 300 176 352 C196 380 236 372 246 340 L250 240 Z" fill="#3a2131"/>
+  <!-- cabello lado derecho -->
+  <path d="M300 110 C336 128 346 170 336 214 C330 236 318 250 304 256 C318 226 322 196 316 168 Z" fill="#3a2131"/>
+  <!-- vestido con barriga -->
+  <path d="M200 262 C188 300 176 380 168 530 L360 530 C352 500 344 478 340 466 C372 446 392 414 392 376 C392 326 356 292 318 282 C304 272 292 262 282 256 Z" fill="#fde7f0"/>
+  <path d="M318 282 C356 292 392 326 392 376 C392 414 372 446 340 466 C336 456 330 452 324 450 C346 430 356 408 354 378 C352 340 330 306 300 292 Z" fill="#f6c9dc"/>
+  <!-- cuello -->
+  <path d="M236 228 L270 228 L274 262 C262 272 246 272 234 262 Z" fill="#f7cdb6"/>
+  <!-- brazo y manos sobre la barriga -->
+  <path d="M214 280 C204 330 222 372 270 384 C300 390 326 382 336 370" fill="none" stroke="#f9d9e6" stroke-width="30" stroke-linecap="round"/>
+  <ellipse cx="338" cy="366" rx="24" ry="18" fill="#ffe1cf" transform="rotate(-25 338 366)"/>
+  <!-- corazón en la barriga -->
+  <path d="M318 352 C304 342 296 334 296 324 C296 316 302 311 309 311 C313 311 316 313 318 317 C320 313 323 311 327 311 C334 311 340 316 340 324 C340 334 332 342 318 352 Z" fill="#8a2f62"/>
+  <!-- cara -->
+  <path d="M182 168 C182 112 222 84 262 88 C306 92 330 126 326 172 C322 214 292 240 256 240 C214 240 182 212 182 168 Z" fill="#ffe1cf"/>
+  <!-- flequillo y cabello -->
+  <path d="M170 176 C160 104 214 64 264 70 C320 76 344 120 334 168 C322 146 306 128 288 120 C292 136 290 150 284 158 C276 136 258 120 236 116 C238 132 230 148 218 156 C214 140 206 130 196 126 C188 140 180 160 170 176 Z" fill="#3a2131"/>
+  <path d="M232 92 C252 84 278 86 296 96" fill="none" stroke="#6b3b56" stroke-width="7" stroke-linecap="round"/>
+  <!-- ojos -->
+  <ellipse cx="292" cy="182" rx="15" ry="20" fill="#3a2131"/>
+  <ellipse cx="231" cy="182" rx="13" ry="19" fill="#3a2131"/>
+  <circle cx="297" cy="175" r="6" fill="#fff"/><circle cx="235" cy="175" r="5" fill="#fff"/>
+  <circle cx="288" cy="191" r="3" fill="#fff" opacity=".8"/><circle cx="228" cy="191" r="2.5" fill="#fff" opacity=".8"/>
+  <!-- mejillas y boca -->
+  <ellipse cx="312" cy="208" rx="13" ry="7" fill="#f59ab8" opacity=".7"/>
+  <ellipse cx="212" cy="208" rx="12" ry="7" fill="#f59ab8" opacity=".7"/>
+  <path d="M254 214 Q264 223 274 214" fill="none" stroke="#a24a6c" stroke-width="5" stroke-linecap="round"/>
+  <!-- flor en el pelo -->
+  <circle cx="320" cy="112" r="13" fill="#f59ab8"/><circle cx="320" cy="112" r="5" fill="#fff3c4"/>
+</g>
+<circle cx="410" cy="410" r="54" fill="#1f7a55" stroke="#8a2f62" stroke-width="12"/><path d="M384 410 L403 429 L438 392" fill="none" stroke="#fff" stroke-width="16" stroke-linecap="round" stroke-linejoin="round"/></g></g></svg></div>
     <div>
       <h1>Agenda VD Gestantes</h1>
-      <p class="sub" id="subtitle">Visitas domiciliarias programadas según tu horario</p>
+      <p class="sub">Visitas domiciliarias según tu horario</p>
     </div>
+    <form id="loginForm" autocomplete="off">
+      <label class="f" id="loginUrlWrap">Enlace del conector (termina en /exec)
+        <input type="url" id="loginUrl" placeholder="https://script.google.com/macros/s/…/exec">
+      </label>
+      <label class="f">PIN
+        <input type="password" id="loginPin" inputmode="numeric" placeholder="••••" required>
+      </label>
+      <button class="primary" type="submit" id="loginBtn">Entrar</button>
+      <p class="msg" id="loginMsg" role="alert"></p>
+    </form>
+  </div>
+</section>
+
+<div class="wrap" id="app" hidden>
+  <div class="top">
+    <div class="brand"><svg viewBox="0 0 512 512" aria-hidden="true"><defs><clipPath id="lg1"><rect width="512" height="512" rx="112"/></clipPath></defs><g clip-path="url(#lg1)"><rect width="512" height="512" fill="#8a2f62"/><circle cx="270" cy="250" r="190" fill="#9c3d72"/><g transform="translate(256 256) scale(1) translate(-256 -256)"><g id="fig">
+  <!-- cabello atrás -->
+  <path d="M168 150 C150 220 150 300 176 352 C196 380 236 372 246 340 L250 240 Z" fill="#3a2131"/>
+  <!-- cabello lado derecho -->
+  <path d="M300 110 C336 128 346 170 336 214 C330 236 318 250 304 256 C318 226 322 196 316 168 Z" fill="#3a2131"/>
+  <!-- vestido con barriga -->
+  <path d="M200 262 C188 300 176 380 168 530 L360 530 C352 500 344 478 340 466 C372 446 392 414 392 376 C392 326 356 292 318 282 C304 272 292 262 282 256 Z" fill="#fde7f0"/>
+  <path d="M318 282 C356 292 392 326 392 376 C392 414 372 446 340 466 C336 456 330 452 324 450 C346 430 356 408 354 378 C352 340 330 306 300 292 Z" fill="#f6c9dc"/>
+  <!-- cuello -->
+  <path d="M236 228 L270 228 L274 262 C262 272 246 272 234 262 Z" fill="#f7cdb6"/>
+  <!-- brazo y manos sobre la barriga -->
+  <path d="M214 280 C204 330 222 372 270 384 C300 390 326 382 336 370" fill="none" stroke="#f9d9e6" stroke-width="30" stroke-linecap="round"/>
+  <ellipse cx="338" cy="366" rx="24" ry="18" fill="#ffe1cf" transform="rotate(-25 338 366)"/>
+  <!-- corazón en la barriga -->
+  <path d="M318 352 C304 342 296 334 296 324 C296 316 302 311 309 311 C313 311 316 313 318 317 C320 313 323 311 327 311 C334 311 340 316 340 324 C340 334 332 342 318 352 Z" fill="#8a2f62"/>
+  <!-- cara -->
+  <path d="M182 168 C182 112 222 84 262 88 C306 92 330 126 326 172 C322 214 292 240 256 240 C214 240 182 212 182 168 Z" fill="#ffe1cf"/>
+  <!-- flequillo y cabello -->
+  <path d="M170 176 C160 104 214 64 264 70 C320 76 344 120 334 168 C322 146 306 128 288 120 C292 136 290 150 284 158 C276 136 258 120 236 116 C238 132 230 148 218 156 C214 140 206 130 196 126 C188 140 180 160 170 176 Z" fill="#3a2131"/>
+  <path d="M232 92 C252 84 278 86 296 96" fill="none" stroke="#6b3b56" stroke-width="7" stroke-linecap="round"/>
+  <!-- ojos -->
+  <ellipse cx="292" cy="182" rx="15" ry="20" fill="#3a2131"/>
+  <ellipse cx="231" cy="182" rx="13" ry="19" fill="#3a2131"/>
+  <circle cx="297" cy="175" r="6" fill="#fff"/><circle cx="235" cy="175" r="5" fill="#fff"/>
+  <circle cx="288" cy="191" r="3" fill="#fff" opacity=".8"/><circle cx="228" cy="191" r="2.5" fill="#fff" opacity=".8"/>
+  <!-- mejillas y boca -->
+  <ellipse cx="312" cy="208" rx="13" ry="7" fill="#f59ab8" opacity=".7"/>
+  <ellipse cx="212" cy="208" rx="12" ry="7" fill="#f59ab8" opacity=".7"/>
+  <path d="M254 214 Q264 223 274 214" fill="none" stroke="#a24a6c" stroke-width="5" stroke-linecap="round"/>
+  <!-- flor en el pelo -->
+  <circle cx="320" cy="112" r="13" fill="#f59ab8"/><circle cx="320" cy="112" r="5" fill="#fff3c4"/>
+</g>
+<circle cx="410" cy="410" r="54" fill="#1f7a55" stroke="#8a2f62" stroke-width="12"/><path d="M384 410 L403 429 L438 392" fill="none" stroke="#fff" stroke-width="16" stroke-linecap="round" stroke-linejoin="round"/></g></g></svg>
+      <div style="min-width:0">
+        <h1>Agenda VD</h1>
+        <p class="sub" id="subtitle">Gestantes y puérperas</p>
+      </div>
+    </div>
+    <button class="iconbtn" id="btnCfg" aria-label="Configuración" title="Configuración"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></button>
   </div>
 
-  <div class="conn">
+  <div class="status">
     <span id="connText"><span class="dot"></span>Sin conectar</span>
-    <div class="row">
-      <button id="btnRefresh" hidden>Actualizar</button>
-      <button id="btnLogin" class="primary">Conectar hoja</button>
-    </div>
+    <button id="btnRefresh">Actualizar</button>
   </div>
 
   <div id="banner"></div>
 
-  <details class="panel" id="cfg">
-    <summary id="cfgSum">Configuración</summary>
-    <div class="f" style="gap:6px">
-      <b style="color:var(--ink)">Conexión con Google Sheets</b>
-      <label class="f">Enlace del conector (Apps Script, termina en /exec)
-        <input type="url" id="cfgUrl" placeholder="https://script.google.com/macros/s/…/exec">
-      </label>
-      <label class="f">PIN
-        <input type="password" id="cfgPin" inputmode="numeric" autocomplete="off" placeholder="El PIN que pusiste en el script">
-      </label>
-      <div class="row"><button id="cfgSave" class="primary">Guardar y conectar</button></div>
-    </div>
-    <hr style="border:none;border-top:1px solid var(--line);margin:0">
+  <section class="panel" id="cfg" hidden>
+    <div class="cfghead"><h2 id="cfgSum">Configuración</h2><button id="cfgClose">Cerrar</button></div>
+    <div class="cfgsec">
+      <b>Mi horario</b>
     <div class="grid2">
       <label class="f">Mi nombre en la hoja HORARIO
         <select id="person"></select>
@@ -146,23 +274,48 @@ select,input[type=number],input[type=search],input[type=text],input[type=url],in
       <span class="small">Turnos en los que haces visitas (de tu fila del horario)</span>
       <div class="chips" id="codes"></div>
     </div>
+    <label class="f">Adolescentes
+      <select id="adolResp"><option value="todos">Programar todos</option><option value="mios">Solo los que tienen mi nombre como responsable</option><option value="off">No programar adolescentes</option></select>
+    </label>
     <div class="f" style="gap:6px">
       <span class="small">Hojas que se leen</span>
       <div class="chips" id="sheets"></div>
     </div>
+    </div>
+    <hr class="sep">
+    <div class="cfgsec">
+    <b>Reglas de visita</b>
     <div style="overflow-x:auto">
       <table class="rules">
         <thead><tr><th>Visita</th><th>Desde</th><th>Meta</th><th>Tolerancia</th></tr></thead>
         <tbody id="rules"></tbody>
       </table>
     </div>
-    <div class="row">
-      <button id="resetRules">Restaurar reglas</button>
-      <button id="clearAll">Borrar datos de este navegador</button>
+    <div class="row"><button id="resetRules">Restaurar reglas</button></div>
     </div>
-  </details>
+    <hr class="sep">
+    <div class="cfgsec">
+      <b>Conexión con Google Sheets</b>
+      <p class="small" id="cfgConnInfo" style="margin:0"></p>
+      <label class="f" id="cfgUrlWrap">Enlace del conector (termina en /exec)
+        <input type="url" id="cfgUrl" placeholder="https://script.google.com/macros/s/…/exec">
+      </label>
+      <label class="f">Cambiar PIN
+        <input type="password" id="cfgPin" inputmode="numeric" autocomplete="off" placeholder="Nuevo PIN">
+      </label>
+      <div class="row"><button id="cfgSave">Guardar conexión</button><button id="btnLogout">Cerrar sesión</button></div>
+    </div>
+    <hr class="sep">
+    <div class="cfgsec">
+      <b>App</b>
+      <div class="row"><button id="btnInstall" class="primary" hidden>Instalar app</button></div>
+      <p class="small" id="installHint" style="margin:0"></p>
+      <div class="row"><button id="clearAll">Borrar datos de este celular</button></div>
+    </div>
+  </section>
 
   <div class="tabs" role="tablist" id="tabs"></div>
+  <div id="sheetHost"></div>
   <div id="view"></div>
 </div>
 
@@ -176,8 +329,22 @@ select,input[type=number],input[type=search],input[type=text],input[type=url],in
 const CONFIG = {
   url: '',                              // https://script.google.com/macros/s/…/exec
   persona: 'ROSSANA D. RAVINES COBIAN', // nombre tal como está en la hoja HORARIO
-  turnos: ['GC','APS']                  // turnos en los que se hacen las visitas
+  turnos: ['GC','APS'],                 // turnos en los que se hacen las visitas
 
+  /* Hoja de ADOLESCENTES: su fila de títulos no coincide con los datos,
+     por eso las columnas se indican aquí con su letra. */
+  adol: {
+    hoja: 'ADOLESCENTES',
+    fila1: 4,               // primera fila con datos
+    cols: { hcl:'B', nombre:'C', cel:'D', dir:'E', dni:'F', fnac:'G', edad:'H', sexo:'I',
+            resp:'K',        // responsable de visita (ej. ROSSANA)
+            vd1:'L', vd2:'M',// donde se anota la fecha de la 1ª y 2ª visita
+            aten:'O',        // 1ª atención (si está vacía se usa CRED 1)
+            cred1:'P', hb1:'T',
+            desde:'V', hasta:'W', // rango 2ª hemoglobina (solo informativo)
+            hb2:'X', obs:'Z' },
+    omitirSiHb2: false      // true = no programar la 2ª visita si la 2ª Hb ya tiene fecha
+  }
 };
 
 /*CORE*/
@@ -203,9 +370,11 @@ const DEFAULT_RULES=[
   {id:'vd2',  label:'2ª visita (preparto)',  base:'fur',  field:'vd2',   unit:'s', offset:36,  early:7,  tol:14, stage:'g'},
   {id:'verif',label:'Verificar parto',       base:'fpp',  field:'parto', unit:'d', offset:1,   early:0,  tol:14, stage:'v'},
   {id:'p1',   label:'1ª visita puerperio',   base:'parto',field:'p1',    unit:'d', offset:3,   early:2,  tol:4,  stage:'p'},
-  {id:'p2',   label:'2ª visita puerperio',   base:'parto',field:'p2',    unit:'d', offset:28,  early:7,  tol:14, stage:'p'}
+  {id:'p2',   label:'2ª visita puerperio',   base:'parto',field:'p2',    unit:'d', offset:28,  early:7,  tol:14, stage:'p'},
+  {id:'avd1', label:'1ª visita adolescente', base:'aten', field:'avd1',  unit:'m', offset:1,   early:7,  tol:15, stage:'a'},
+  {id:'avd2', label:'2ª visita adolescente', base:'aten', field:'avd2',  unit:'d', offset:80,  early:0,  tol:10, stage:'a'}
 ];
-const BASE_LABEL={apn:'1° APN',fur:'FUR',fpp:'FPP',parto:'Parto'};
+const BASE_LABEL={apn:'1° APN',fur:'FUR',fpp:'FPP',parto:'Parto',aten:'1ª atención'};
 
 function mapHeader(h){
   const N=h.map(norm), c={};
@@ -233,7 +402,7 @@ function parseGestSheet(rows,sheet,r0=0,c0=0){
   const c=mapHeader(rows[hi]), out=[];
   const g=(r,k)=>c[k]>=0?r[c[k]]:undefined;
   const str=v=>v==null?'':String(v).trim();
-  const absCols={};for(const k of FIELDS)absCols[k]=c[k]>=0?c[k]+c0:-1;
+  const absCols={};for(const k of [...FIELDS,'cel','dir'])absCols[k]=c[k]>=0?c[k]+c0:-1;
   for(let i=hi+1;i<rows.length;i++){
     const r=rows[i]||[];
     const nombre=[g(r,'ap'),g(r,'am'),g(r,'n1'),g(r,'n2')].map(str).filter(Boolean).join(' ').replace(/\s+/g,' ');
@@ -248,7 +417,7 @@ function parseGestSheet(rows,sheet,r0=0,c0=0){
     if(!/^9\d{8}/.test(rec.cel.replace(/\D/g,''))){
       for(const v of r){const s=str(v).replace(/\D/g,'');if(/^9\d{8}$/.test(s)){rec.cel=s;break}}
     }
-    rec.srcs=[{sheet,row:rec.row,cols:absCols,filled}];
+    rec.srcs=[{sheet,row:rec.row,cols:absCols,filled,who:{dni:rec.dni,ap:str(g(r,'ap')),n1:str(g(r,'n1'))}}];
     out.push(rec);
   }
   return out;
@@ -267,15 +436,15 @@ function parseHorario(rows){
     if(typeof r[0]!=='number'||!nm)continue;
     const dr=rows[dayRow]||[]; const key=norm(nm);
     const p=people[key]||(people[key]={name:nm,prof:String(r[nameCol+1]||'').trim(),codes:{}});
-    const seen=new Set();
+    const seen=new Set(), dim=new Date(Date.UTC(y,m+1,0)).getUTCDate();
     for(let j=0;j<dr.length;j++){
-      const dn=dr[j]; if(typeof dn!=='number'||dn<1||dn>31||j<=nameCol||seen.has(dn))continue;
+      const dn=dr[j]; if(typeof dn!=='number'||dn<1||dn>dim||j<=nameCol||seen.has(dn))continue;
       seen.add(dn); // la fila de días puede tener totales a la derecha (ej. 31): solo vale la primera aparición
       const raw=String(r[j]==null?'':r[j]).trim();
       p.codes[dayOf(y,m,dn)]=raw.length>6?'VAC':norm(raw);
     }
     let lastVac=false;
-    for(let dn=1;dn<=31;dn++){const day=dayOf(y,m,dn);const c=p.codes[day];if(c==='VAC')lastVac=true;else if(c)lastVac=false;else if(lastVac&&c==='')p.codes[day]='VAC'}
+    for(let dn=1;dn<=dim;dn++){const day=dayOf(y,m,dn);const c=p.codes[day];if(c==='VAC')lastVac=true;else if(c)lastVac=false;else if(lastVac&&c==='')p.codes[day]='VAC'}
   }
   return {months,people:Object.values(people)};
 }
@@ -314,6 +483,7 @@ function buildItems(recs,rules,T,done,horizon=90){
     if(!hasParto&&fur==null){alerts.push({r,kind:'dato',msg:'Sin FUR ni parto: no se puede calcular'});continue}
     if(!hasParto&&fpp!=null&&T>fpp+60){alerts.push({r,kind:'parto',msg:'FPP pasó hace más de 2 meses y no hay parto registrado'});continue}
     for(const ru of rules){
+      if(ru.stage==='a')continue;
       if(ru.stage==='g'&&(hasParto||(fpp!=null&&T>fpp)))continue;
       if(ru.stage==='p'&&f.parto==null)continue;
       if(ru.stage==='v'&&(hasParto||fpp==null||T<=fpp))continue;
@@ -336,7 +506,8 @@ function buildItems(recs,rules,T,done,horizon=90){
 function schedule(items,avail,cap,T){
   const load={};
   const free=d=>avail(d).ok&&(load[d]||0)<cap;
-  const fixed=items.filter(i=>i.fixed!=null), rest=items.filter(i=>i.fixed==null).sort((a,b)=>a.deadline-b.deadline||a.target-b.target);
+  // primero las que todavía pueden hacerse a tiempo (por plazo), después las ya vencidas
+  const fixed=items.filter(i=>i.fixed!=null), rest=items.filter(i=>i.fixed==null).sort((a,b)=>((a.deadline<T)-(b.deadline<T))||a.deadline-b.deadline||a.target-b.target);
   for(const it of fixed){it.date=it.fixed;load[it.date]=(load[it.date]||0)+1;it.status='fixed'}
   for(const it of rest){
     const from=Math.max(T,it.target); let chosen=null;
@@ -352,29 +523,81 @@ function schedule(items,avail,cap,T){
   return items;
 }
 /* Celdas a escribir en la hoja para una visita hecha: solo en filas donde la celda está vacía */
+const FKEY={vd:'VD',vd2:'VD2',plan2:'PLAN2',plan3:'PLAN3',parto:'PARTO',p1:'P1',p2:'P2',cel:'CEL',dir:'DIR'};
 const isoDay=d=>{const [y,m,dd]=ymd(d);return `${y}-${String(m+1).padStart(2,'0')}-${String(dd).padStart(2,'0')}`};
 function cellsFor(rec,field,day){
   const out=[];
   for(const s of rec.srcs||[]){
     const col=s.cols[field]; if(col==null||col<0||s.filled[field])continue;
-    out.push({sheet:s.sheet,col,row:s.row,iso:isoDay(day)});
+    out.push({sheet:s.sheet,col,row:s.row,k:FKEY[field],who:s.who,iso:isoDay(day)});
   }
   return out;
+}
+/* ---- Adolescentes ---- */
+function colIdx(L){let n=0;for(const ch of String(L).toUpperCase())n=n*26+(ch.charCodeAt(0)-64);return n-1}
+function parseAdol(rows,sheet,A){
+  const c={};for(const k in A.cols)c[k]=colIdx(A.cols[k]);
+  const str=v=>v==null?'':String(v).trim();const out=[];
+  for(let i=(A.fila1||4)-1;i<rows.length;i++){
+    const r=rows[i]||[];const nombre=str(r[c.nombre]).replace(/\s+/g,' ');
+    if(!nombre||/NOMBRES Y APELLIDOS/i.test(nombre))continue;
+    const rec={tipo:'adol',sheet,row:i+1,nombre:nombre.toUpperCase(),hcl:str(r[c.hcl]),dni:str(r[c.dni]),cel:str(r[c.cel]),dir:str(r[c.dir]),
+      obs:str(r[c.obs]),resp:str(r[c.resp]),edad:str(r[c.edad]),sexo:str(r[c.sexo]).toUpperCase(),f:{},t:{}};
+    for(const k of ['fnac','aten','cred1','hb1','desde','hasta','hb2','vd1','vd2']){
+      const v=r[c[k]];if(v==null||str(v)==='')continue;const d=toDay(v);if(d!=null)rec.f[k==='vd1'?'avd1':k==='vd2'?'avd2':k]=d;else rec.t[k==='vd1'?'avd1':k==='vd2'?'avd2':k]=str(v)}
+    if(!/^9\d{8}/.test(rec.cel.replace(/\D/g,'')))rec.cel=/\d{6,}/.test(rec.cel)?rec.cel:'';
+    const dd=rec.dni.replace(/\D/g,'');rec.id='A'+(dd.length>=8?dd:norm(nombre));
+    rec.srcs=[{sheet,row:i+1,cols:{avd1:c.vd1,avd2:c.vd2,cel:c.cel,dir:c.dir},filled:{avd1:rec.f.avd1!=null||rec.t.avd1!=null,avd2:rec.f.avd2!=null||rec.t.avd2!=null},who:{dni:rec.dni,nombre}}];
+    out.push(rec);
+  }
+  return out;
+}
+const ADOL_EXCLUDE=/NO INGRESA|CUMPLIO|MIGR|VIAJ|SE FUE|FALLEC|CAMBIO DE DOMIC/;
+const addMonths=(d,n)=>{const [y,m,dd]=ymd(d);return dayOf(y,m+n,dd)};
+function buildAdol(recs,rules,T,done,A){
+  const items=[],excluded=[];
+  const r1=rules.find(r=>r.id==='avd1'),r2=rules.find(r=>r.id==='avd2');
+  for(const r of recs){
+    const txt=norm(Object.values(r.t).join(' ')+' '+r.obs);
+    if(ADOL_EXCLUDE.test(txt)){excluded.push({r,why:(txt.match(ADOL_EXCLUDE)||[''])[0]});continue}
+    const push=(ru,target,deadline,start)=>{
+      const key=r.id+'|'+ru.id;if(done[key]!=null)return;
+      const cell=r.f[ru.field];if(r.t[ru.field]!=null)return;
+      if(cell!=null&&cell<=T)return;
+      items.push({key,r,rule:ru,target,deadline,start,fixed:(cell!=null&&cell>T)?cell:null});
+    };
+    const base=r.f.aten!=null?r.f.aten:r.f.cred1;
+    if(r1&&base!=null){
+      const target=r1.unit==='m'?addMonths(base,r1.offset):base+(r1.unit==='s'?r1.offset*7:r1.offset);
+      const deadline=target+r1.tol;
+      if(deadline>=T-60||(r.f.avd1!=null&&r.f.avd1>T))push(r1,target,deadline,target-r1.early);
+    }
+    // 2ª visita: entre el día 80 y el 90 desde la 1ª atención (para todos, también donde dice NA)
+    if(r2&&base!=null&&!(A.omitirSiHb2&&r.f.hb2!=null)){
+      const target=base+r2.offset;
+      const deadline=target+r2.tol;
+      if(deadline>=T-30||(r.f.avd2!=null&&r.f.avd2>T))push(r2,target,deadline,target-r2.early);
+    }
+  }
+  return {items,excluded};
 }
 /*ENDCORE*/
 
 /* ---------- Estado ---------- */
-const LS='agendaVD.v3';
+const LS='agendaVD.v4';
 const WD=['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
 const WDL=['domingo','lunes','martes','miércoles','jueves','viernes','sábado'];
 const MES=['enero','febrero','marzo','abril','mayo','junio','julio','agosto','setiembre','octubre','noviembre','diciembre'];
 const fmt=d=>{const [,m,dd]=ymd(d);return String(dd).padStart(2,'0')+'/'+String(m+1).padStart(2,'0')};
 const fmtY=d=>fmt(d)+'/'+ymd(d)[0];
 const T=todayDay();
-let S={data:null,settings:{person:'',codes:null,cap:4,sheets:null,rules:null,url:'',pin:''},done:{},pending:[],tab:'semana',calMonth:null,selDay:T,saving:{},conn:{state:'off',msg:'Sin conectar'},err:''};
+let S={data:null,settings:{person:'',codes:null,cap:4,skip:null,rules:null,url:'',pin:''},done:{},pending:[],tab:'semana',calMonth:null,selDay:T,saving:{},conn:{state:'off',msg:'Sin conectar'},err:''};
 try{const s=JSON.parse(localStorage.getItem(LS)||'null');if(s){S.data=s.data||null;Object.assign(S.settings,s.settings||{});S.done=s.done||{};S.pending=s.pending||[]}}catch(e){}
 function save(){try{localStorage.setItem(LS,JSON.stringify({data:S.data,settings:S.settings,done:S.done,pending:S.pending}))}catch(e){}}
-const rules=()=>S.settings.rules||DEFAULT_RULES.map(r=>({...r}));
+const rules=()=>{const rs=S.settings.rules||DEFAULT_RULES.map(r=>({...r}));
+  // reglas guardadas de versiones anteriores: completar las nuevas y actualizar la 2ª visita de adolescentes
+  for(const d of DEFAULT_RULES){const i=rs.findIndex(x=>x.id===d.id);if(i<0)rs.push({...d});else if(d.id==='avd2'&&rs[i].base!==d.base)rs[i]={...d}}
+  return rs};
 const cfgUrl=()=>(CONFIG.url||S.settings.url||'').trim();
 const cfgPin=()=>(S.settings.pin||'').trim();
 const ready=()=>!!(cfgUrl()&&cfgPin());
@@ -400,8 +623,10 @@ function sampleData(){
 /* ---------- Leer las hojas que envía Google Sheets ---------- */
 function parseSheets(sheets,name){
   const gest={},sheetNames=[];let hor={months:[],people:[]};
+  let adol=[],adolSheet='';
   for(const sh of sheets){
     const rows=sh.values||[];
+    if(CONFIG.adol&&norm(sh.name)===norm(CONFIG.adol.hoja)){adol=parseAdol(rows,sh.name,CONFIG.adol);adolSheet=sh.name;continue}
     const g=parseGestSheet(rows,sh.name,0,0);
     if(g&&g.length){gest[sh.name]=g;sheetNames.push(sh.name);continue}
     const h=parseHorario(rows);
@@ -409,12 +634,12 @@ function parseSheets(sheets,name){
       for(const p of h.people){const ex=hor.people.find(x=>norm(x.name)===norm(p.name));if(ex)Object.assign(ex.codes,p.codes);else hor.people.push(p)}}
   }
   if(!sheetNames.length)throw new Error('No encontré hojas con las columnas APELLIDO PATERNO y FUR');
-  const prevSheets=S.data&&!S.data.demo?S.settings.sheets:null;
-  S.data={demo:false,source:'gsheet',file:name,loadedAt:Date.now(),sheetNames,gest,horario:hor};
-  if(!prevSheets||!prevSheets.some(s=>sheetNames.includes(s))){const pref=sheetNames.filter(n=>!/MIGRA|VACUNA/.test(norm(n)));S.settings.sheets=pref.length?pref:sheetNames}
+  S.data={demo:false,source:'gsheet',file:name,loadedAt:Date.now(),sheetNames,gest,horario:hor,adol,adolSheet};
+  // Se guardan las hojas EXCLUIDAS: una hoja nueva o renombrada entra sola
+  if(!Array.isArray(S.settings.skip))S.settings.skip=sheetNames.filter(n=>/MIGRA|VACUNA|PUERPER/.test(norm(n)));
   if(!hor.people.some(p=>p.name===S.settings.person)){
     const def=hor.people.find(p=>norm(p.name)===norm(CONFIG.persona))||hor.people.find(p=>CONFIG.persona&&norm(p.name).includes(norm(CONFIG.persona).split(' ').pop()));
-    S.settings.person=def?def.name:'';S.settings.codes=null;if(!def)$('cfg').open=true}
+    S.settings.person=def?def.name:'';S.settings.codes=null;if(!def)openCfg()}
   save();
 }
 
@@ -434,19 +659,25 @@ async function loadSheet(){
   setConn('busy','Leyendo la hoja…');
   try{
     const j=await api('read');
+    if(j.moved)toast(`${j.moved} puérpera(s) con 2ª VD trasladada(s) a PUERPERAS`);
     parseSheets(j.sheets,j.name);
-    S.err='';setConn('on',`${j.name} · actualizado ${hora()}`);
+    S.err='';setConn('on',`Actualizado ${hora()}`);
     render();
     if(S.pending.length)flushPending();
-  }catch(e){S.err=e.message;setConn('err','No se pudo leer la hoja');render()}
+  }catch(e){
+    if(/PIN incorrecto/.test(e.message)){logout();$('loginMsg').textContent='El PIN cambió. Ingresa el nuevo PIN.';return}
+    S.err=e.message;setConn('err','Sin conexión · mostrando lo último guardado');render()}
 }
 
 /* ---------- Escribir visitas hechas en la hoja ---------- */
 async function writeCells(cells){
   const j=await api('write',{cells});
+  if(j.moved)setTimeout(()=>toast(`${j.moved} puérpera(s) con 2ª VD trasladada(s) a PUERPERAS`),1500);
   const busy=(j.results||[]).filter(r=>!r.ok&&r.why==='ocupada');
   if(busy.length)toast(busy.length+' celda(s) ya tenían dato; no se tocaron');
-  const miss=(j.results||[]).filter(r=>!r.ok&&r.why!=='ocupada');
+  const dif=(j.results||[]).filter(r=>!r.ok&&r.why==='distinta');
+  if(dif.length)toast('La fecha en la hoja ya era otra; no se borró');
+  const miss=(j.results||[]).filter(r=>!r.ok&&r.why!=='ocupada'&&r.why!=='distinta');
   if(miss.length)throw new Error('No se pudo escribir: '+miss.map(r=>r.why).join(', '));
 }
 async function flushPending(){
@@ -464,19 +695,99 @@ async function flushPending(){
     toast('No se pudo guardar. Queda pendiente.');
   }
 }
-function markDone(item,day){
-  const cells=cellsFor(item.r,item.rule.field,day);
-  if(S.data&&S.data.source==='gsheet'){
-    if(!cells.length){toast('No encontré la columna de esta visita en la hoja');return}
-    S.pending.push({key:item.key,label:`${item.r.nombre} – ${item.rule.label}`,day,cells});
-    S.saving[item.key]='saving';
-    // reflejarlo de inmediato en pantalla
-    for(const s of item.r.srcs){if(s.cols[item.rule.field]>=0){s.filled[item.rule.field]=true}}
-    patchLocal(item.r,item.rule.field,day);
-    save();render();flushPending();
-  }else{
-    S.done[item.key]=day;save();render();toast('Datos de ejemplo: conecta tu hoja para guardar de verdad');
+/* Celdas de celular/dirección: se sobrescriben en todas las hojas donde aparece la persona */
+function dataCells(rec,changes){
+  const out=[];
+  for(const k of ['cel','dir']){
+    if(changes[k]==null)continue;
+    for(const s of rec.srcs||[]){const col=s.cols[k];if(col==null||col<0)continue;out.push({sheet:s.sheet,col,row:s.row,k:FKEY[k],who:s.who,text:changes[k]})}
   }
+  return out;
+}
+function saveVisit(rec,item,day,changes){
+  const live=S.data&&S.data.source==='gsheet';
+  if(!live){if(item&&day!=null)S.done[item.key]=day;save();render();toast('Datos de ejemplo: conecta tu hoja para guardar de verdad');return}
+  const cells=[];
+  if(item&&day!=null){
+    const c=cellsFor(rec,item.rule.field,day);
+    if(!c.length){toast('No encontré la columna de esta visita en la hoja');return}
+    cells.push(...c);
+  }
+  cells.push(...dataCells(rec,changes));
+  if(!cells.length){toast('No hay cambios para guardar');return}
+  const key=item?item.key:'datos|'+rec.id+'|'+Date.now();
+  const label=item?`${rec.nombre} – ${item.rule.label}`:`${rec.nombre} – datos`;
+  S.pending.push({key,label,day:item?day:null,cells});
+  if(item)S.saving[item.key]='saving';
+  // reflejarlo de inmediato en pantalla
+  if(item&&day!=null)patchLocal(rec,item.rule.field,day);
+  patchData(rec,changes);
+  save();render();flushPending();
+}
+function patchData(rec,changes){
+  const D=S.data;if(!D)return;
+  for(const s of rec.srcs||[]){const arr=D.gest[s.sheet];if(!arr)continue;const r=arr.find(x=>x.row===s.row);if(!r)continue;
+    if(changes.cel!=null)r.cel=changes.cel;if(changes.dir!=null)r.dir=changes.dir}
+}
+
+/* ---------- Ventana: visita hecha / parto / editar datos ---------- */
+function openSheet(rec,item,mode){
+  const host=$('sheetHost');
+  const title=mode==='visita'?'Visita hecha':mode==='parto'?'Registrar parto':'Editar datos';
+  const dateLbl=mode==='parto'?'Fecha del parto':'Fecha de la visita';
+  const hasCelCol=(rec.srcs||[]).some(s=>s.cols.cel>=0), hasDirCol=(rec.srcs||[]).some(s=>s.cols.dir>=0);
+  host.innerHTML=`<div class="sheet-bg" id="sheetBg"><form class="sheet" id="sheetForm" role="dialog" aria-modal="true" aria-labelledby="sheetTitle">
+    <h2 id="sheetTitle">${title}</h2>
+    <div class="who"><b>${esc(rec.nombre)}</b>${item?` · ${esc(item.rule.label)}`:''}</div>
+    ${mode!=='datos'?`<label class="f">${dateLbl}<input type="date" id="shDate" value="${mode==='parto'?'':isoOf(T)}" max="${isoOf(T)}" required></label>`:''}
+    <label class="f">Celular${hasCelCol?'':' <span class="was">(la hoja no tiene columna CELULAR)</span>'}
+      <input type="tel" id="shCel" inputmode="tel" value="${esc(rec.cel)}" placeholder="9xxxxxxxx"${hasCelCol?'':' disabled'}>
+      ${rec.cel?`<span class="was">Actual: ${esc(rec.cel)}</span>`:''}</label>
+    <label class="f">Dirección${hasDirCol?'':' <span class="was">(la hoja no tiene columna DIRECCION)</span>'}
+      <input type="text" id="shDir" value="${esc(rec.dir)}" placeholder="Jr./Psje./Av. y número"${hasDirCol?'':' disabled'}>
+      ${rec.dir?`<span class="was">Actual: ${esc(rec.dir)}</span>`:''}</label>
+    <p class="small" style="margin:0">${mode==='datos'?'Se actualiza en la hoja':'La fecha y los datos que cambies se guardan en la hoja'}${(rec.srcs||[]).length>1?' (en todas las hojas donde aparece)':''}.</p>
+    <div class="actions"><button type="button" id="shCancel">Cancelar</button><button type="submit" class="primary">${mode==='datos'?'Guardar datos':mode==='parto'?'Guardar parto':'Guardar visita'}</button></div>
+  </form></div>`;
+  const close=()=>{host.innerHTML='';document.removeEventListener('keydown',onKey)};
+  const onKey=e=>{if(e.key==='Escape')close()};
+  document.addEventListener('keydown',onKey);
+  $('shCancel').onclick=close;
+  $('sheetBg').addEventListener('click',e=>{if(e.target.id==='sheetBg')close()});
+  $('sheetForm').addEventListener('submit',e=>{
+    e.preventDefault();
+    let day=null;
+    if(mode!=='datos'){const v=$('shDate').value;if(!v){toast('Elige la fecha');return}const [y,mo,d]=v.split('-').map(Number);day=dayOf(y,mo-1,d);if(day>T){toast('La fecha no puede ser futura');return}}
+    const cel=$('shCel').value.trim().replace(/\s+/g,' '), dir=$('shDir').value.trim().replace(/\s+/g,' ');
+    const changes={};
+    if(hasCelCol&&cel!==String(rec.cel||''))changes.cel=cel;
+    if(hasDirCol&&dir!==String(rec.dir||''))changes.dir=dir;
+    if(changes.cel&&!/^[0-9 \/+-]{6,40}$/.test(changes.cel)){toast('Revisa el celular: solo números (y / para separar dos)');return}
+    close();
+    saveVisit(rec,mode==='datos'?null:item,day,changes);
+  });
+  setTimeout(()=>{const f=mode==='parto'?$('shDate'):mode==='datos'?$('shCel'):$('sheetForm').querySelector('.primary');f&&f.focus()},30);
+}
+/* ---------- Visitas ya hechas (salen de las fechas de la hoja) ---------- */
+const VISIT_RULES=()=>rules().filter(r=>r.stage==='g'||r.stage==='p'||r.stage==='a');
+function visitedOn(C,d){
+  const out=[];
+  for(const r of C.recs)for(const ru of VISIT_RULES())if(r.f[ru.field]===d)out.push({r,rule:ru,field:ru.field,day:d,key:'del|'+r.id+'|'+ru.field+'|'+d});
+  return out.sort((a,b)=>a.r.nombre.localeCompare(b.r.nombre));
+}
+function deleteVisit(v){
+  if(!(S.data&&S.data.source==='gsheet')){toast('Datos de ejemplo: no hay nada que borrar en la hoja');return}
+  const cells=[];
+  for(const s of v.r.srcs||[]){const col=s.cols[v.field];if(col==null||col<0)continue;cells.push({sheet:s.sheet,col,row:s.row,k:FKEY[v.field],who:s.who,iso:isoDay(v.day),clear:true})}
+  if(!cells.length){toast('No encontré la columna de esta visita');return}
+  S.pending.push({key:v.key,label:`${v.r.nombre} – ${v.rule.label}`,day:v.day,del:true,cells});
+  unpatchLocal(v.r,v.field,v.day);
+  save();render();flushPending();
+}
+function unpatchLocal(rec,field,day){
+  const D=S.data;if(!D)return;
+  for(const s of rec.srcs||[]){const arr=D.gest[s.sheet];if(!arr)continue;const r=arr.find(x=>x.row===s.row);
+    if(r&&r.f[field]===day){delete r.f[field];for(const x of r.srcs||[])if(x.filled)x.filled[field]=false}}
 }
 function patchLocal(rec,field,day){
   const D=S.data;if(!D)return;
@@ -486,7 +797,8 @@ function patchLocal(rec,field,day){
 /* ---------- Cálculo ---------- */
 function compute(){
   const D=S.data||sampleData();
-  const sheets=(S.settings.sheets||D.sheetNames).filter(s=>D.gest[s]);
+  const skip=S.settings.skip||[];
+  let sheets=D.sheetNames.filter(s=>!skip.includes(s));if(!sheets.length)sheets=D.sheetNames.slice();
   const recs=mergeRecords(sheets.flatMap(s=>D.gest[s].map(r=>({...r,f:{...r.f},t:{...r.t},srcs:(r.srcs||[]).map(x=>({...x,filled:{...x.filled}}))}))));
   if(D.demo)recs.forEach((r,i)=>r.id='EJ'+i);
   const person=D.demo?'OBSTETRA DE EJEMPLO':S.settings.person;
@@ -496,6 +808,12 @@ function compute(){
   if(!codes||D.demo){const pref=present.filter(c=>['GC','APS','C'].includes(c));codes=pref.length?pref:present.filter(c=>!['L','VAC','CS','ON','LE'].includes(c))}
   const avail=makeAvail(D.horario,person,codes);
   const {items,alerts,excluded}=buildItems(recs,rules(),T,S.done);
+  // Adolescentes
+  let adol=(D.adol||[]).map(r=>({...r,f:{...r.f},t:{...r.t},srcs:r.srcs.map(x=>({...x,filled:{...x.filled}}))}));
+  if(S.settings.adolResp==='mios'&&person){const me=norm(person).split(' ')[0];adol=adol.filter(r=>norm(r.resp).includes(me))}
+  if(S.settings.adolOff)adol=[];
+  const A=buildAdol(adol,rules(),T,S.done,CONFIG.adol);
+  items.push(...A.items);excluded.push(...A.excluded);recs.push(...adol);
   schedule(items,avail,Math.max(1,+S.settings.cap||4),T);
   return {D,recs,items,alerts,excluded,avail,present,codes,person};
 }
@@ -506,62 +824,97 @@ const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;',
 function toast(msg){const t=document.createElement('div');t.className='toast';t.textContent=msg;document.body.appendChild(t);setTimeout(()=>t.remove(),2800)}
 function setConn(state,msg){S.conn={state,msg};
   $('connText').innerHTML=`<span class="dot ${state}"></span>${esc(msg)}`;
-  $('btnLogin').hidden=ready()&&!!S.data&&S.data.source==='gsheet';$('btnRefresh').hidden=!ready();}
+}
+function adolInfo(r,it){
+  const base=r.f.aten!=null?r.f.aten:r.f.cred1;
+  return `<span class="tag adol">Adolescente${r.edad?' · '+esc(r.edad)+' años':''}</span>${base!=null?`<span>1ª atención <span class="mono">${fmtY(base)}</span></span>`:''}${it&&it.rule.id==='avd2'?`<span>Día 80–90: <span class="mono">${fmt(it.target)}–${fmt(it.deadline)}</span></span>`:''}${r.resp?`<span>Resp.: ${esc(r.resp)}</span>`:''}`;
+}
 const egTxt=(r,d=T)=>{if(r.f.fur==null)return '';const x=d-r.f.fur;if(x<0)return '';return Math.floor(x/7)+' s '+(x%7)+' d'};
 const ST={overdue:'Atrasada',late:'Fuera de plazo',ok:'A tiempo',fixed:'Ya programada',nohor:'Falta horario'};
 
 function renderCfg(C){
   const D=C.D;
-  $('cfgSum').textContent='Configuración · '+(D.demo?'ejemplo':(S.settings.person||'elige tu nombre'));
+  $('cfgSum').textContent='Configuración';
   if(document.activeElement!==$('cfgUrl'))$('cfgUrl').value=cfgUrl();
-  if(document.activeElement!==$('cfgPin'))$('cfgPin').value=cfgPin();
-  $('cfgUrl').closest('label').hidden=!!CONFIG.url;
+  $('cfgUrlWrap').hidden=!!CONFIG.url;
+  $('cfgConnInfo').textContent=S.data&&!D.demo?`Conectado a “${D.file}”. La sesión queda iniciada en este celular.`:'Sin datos cargados todavía.';
   const ps=$('person');
   ps.innerHTML='<option value="">— Elige tu nombre —</option>'+D.horario.people.map(p=>`<option value="${esc(p.name)}"${p.name===C.person?' selected':''}>${esc(p.name)} · ${esc(p.prof)}</option>`).join('');
   ps.disabled=D.demo;
   $('cap').value=S.settings.cap;
+  $('adolResp').value=S.settings.adolOff?'off':(S.settings.adolResp||'todos');
   $('codes').innerHTML=C.present.length?C.present.filter(c=>c!=='VAC').map(c=>`<label class="chip"><input type="checkbox" value="${esc(c)}"${C.codes.includes(c)?' checked':''}>${esc(c)}</label>`).join(''):'<span class="small">Elige tu nombre para ver tus turnos.</span>';
-  const sel=S.settings.sheets||D.sheetNames;
-  $('sheets').innerHTML=D.sheetNames.map(s=>`<label class="chip"><input type="checkbox" value="${esc(s)}"${sel.includes(s)?' checked':''}>${esc(s)} <span class="mono" style="opacity:.7">${D.gest[s].length}</span></label>`).join('');
-  $('rules').innerHTML=rules().map((r,i)=>`<tr><td>${esc(r.label)}</td><td class="small">${BASE_LABEL[r.base]}</td><td><input type="number" data-i="${i}" data-k="offset" value="${r.offset}" min="0"> <span class="small">${r.unit==='s'?'sem':'días'}</span></td><td><input type="number" data-i="${i}" data-k="tol" value="${r.tol}" min="0"> <span class="small">días</span></td></tr>`).join('');
+  const skip=S.settings.skip||[];
+  $('sheets').innerHTML=D.sheetNames.map(s=>`<label class="chip"><input type="checkbox" value="${esc(s)}"${!skip.includes(s)?' checked':''}>${esc(s)} <span class="mono" style="opacity:.7">${D.gest[s].length}</span></label>`).join('');
+  $('rules').innerHTML=rules().map((r,i)=>`<tr><td>${esc(r.label)}</td><td class="small">${BASE_LABEL[r.base]}</td><td><input type="number" data-i="${i}" data-k="offset" value="${r.offset}" min="0"> <span class="small">${r.unit==='s'?'sem':r.unit==='m'?'mes':'días'}</span></td><td><input type="number" data-i="${i}" data-k="tol" value="${r.tol}" min="0"> <span class="small">días</span></td></tr>`).join('');
 }
 $('person').addEventListener('change',e=>{S.settings.person=e.target.value;S.settings.codes=null;save();render()});
+$('adolResp').addEventListener('change',e=>{const v=e.target.value;S.settings.adolOff=v==='off';S.settings.adolResp=v==='mios'?'mios':'todos';save();render()});
 $('cap').addEventListener('change',e=>{S.settings.cap=Math.max(1,+e.target.value||1);save();render()});
 $('codes').addEventListener('change',()=>{S.settings.codes=[...$('codes').querySelectorAll('input:checked')].map(i=>i.value);save();render()});
-$('sheets').addEventListener('change',()=>{S.settings.sheets=[...$('sheets').querySelectorAll('input:checked')].map(i=>i.value);save();render()});
+$('sheets').addEventListener('change',()=>{S.settings.skip=[...$('sheets').querySelectorAll('input:not(:checked)')].map(i=>i.value);save();render()});
 $('rules').addEventListener('change',e=>{const i=+e.target.dataset.i,k=e.target.dataset.k;const rs=rules();rs[i][k]=Math.max(0,+e.target.value||0);S.settings.rules=rs;save();render()});
 $('resetRules').addEventListener('click',()=>{S.settings.rules=null;save();render();toast('Reglas restauradas')});
-async function connect(){
-  if(!CONFIG.url)S.settings.url=$('cfgUrl').value.trim();
-  S.settings.pin=$('cfgPin').value.trim();save();
-  if(!cfgUrl()){$('cfg').open=true;$('cfgUrl').focus();toast('Pega el enlace del conector');return}
-  if(!cfgPin()){$('cfg').open=true;$('cfgPin').focus();toast('Escribe el PIN');return}
-  await loadSheet();
+function openCfg(){$('cfg').hidden=false;$('cfg').scrollIntoView({behavior:'smooth',block:'start'})}
+$('btnCfg').addEventListener('click',()=>{$('cfg').hidden?openCfg():($('cfg').hidden=true)});
+$('cfgClose').addEventListener('click',()=>{$('cfg').hidden=true});
+/* Pantalla de ingreso: se muestra solo si no hay sesión guardada en este celular */
+function showGate(){
+  const logged=ready()&&!!S.data&&!S.data.demo;
+  $('login').hidden=logged;$('app').hidden=!logged;
+  $('loginUrlWrap').hidden=!!CONFIG.url;
+  if(!logged&&!CONFIG.url&&document.activeElement!==$('loginUrl'))$('loginUrl').value=S.settings.url||'';
 }
-$('cfgSave').addEventListener('click',connect);
-$('btnLogin').addEventListener('click',()=>{if(ready())loadSheet();else{$('cfg').open=true;(CONFIG.url?$('cfgPin'):$('cfgUrl')).focus();toast(CONFIG.url?'Escribe el PIN':'Pega el enlace del conector y el PIN')}});
+$('loginForm').addEventListener('submit',async e=>{
+  e.preventDefault();
+  const url=CONFIG.url||$('loginUrl').value.trim(),pin=$('loginPin').value.trim();
+  if(!url){$('loginMsg').textContent='Pega el enlace del conector';return}
+  if(!pin){$('loginMsg').textContent='Escribe el PIN';return}
+  $('loginBtn').disabled=true;$('loginBtn').textContent='Entrando…';$('loginMsg').textContent='';
+  const prev={url:S.settings.url,pin:S.settings.pin};
+  S.settings.url=CONFIG.url?S.settings.url:url;S.settings.pin=pin;
+  try{const j=await api('read');parseSheets(j.sheets,j.name);S.err='';save();$('loginPin').value='';
+    showGate();setConn('on',`Actualizado ${hora()}`);render();}
+  catch(err){S.settings.url=prev.url;S.settings.pin=prev.pin;$('loginMsg').textContent=err.message}
+  $('loginBtn').disabled=false;$('loginBtn').textContent='Entrar';
+});
+function logout(){
+  S.settings.pin='';S.data=null;S.pending=[];S.saving={};S.err='';save();
+  $('cfg').hidden=true;showGate();$('loginPin').focus();
+}
+$('btnLogout').addEventListener('click',e=>{
+  if(e.target.dataset.armed!=='1'){e.target.dataset.armed='1';e.target.textContent='Toca otra vez para salir';setTimeout(()=>{e.target.dataset.armed='';e.target.textContent='Cerrar sesión'},4000);return}
+  logout();
+});
+$('cfgSave').addEventListener('click',async()=>{
+  const prev={url:S.settings.url,pin:S.settings.pin};
+  if(!CONFIG.url&&$('cfgUrl').value.trim())S.settings.url=$('cfgUrl').value.trim();
+  if($('cfgPin').value.trim())S.settings.pin=$('cfgPin').value.trim();
+  try{setConn('busy','Probando conexión…');const j=await api('read');parseSheets(j.sheets,j.name);save();$('cfgPin').value='';S.err='';setConn('on',`Actualizado ${hora()}`);render();toast('Conexión guardada')}
+  catch(err){S.settings.url=prev.url;S.settings.pin=prev.pin;setConn('err','No se pudo conectar');toast(err.message)}
+});
 $('btnRefresh').addEventListener('click',()=>loadSheet());
 let clearArmed=false;
 $('clearAll').addEventListener('click',e=>{
-  if(!clearArmed){clearArmed=true;e.target.textContent='Toca otra vez para borrar';setTimeout(()=>{clearArmed=false;e.target.textContent='Borrar datos de este navegador'},4000);return}
+  if(!clearArmed){clearArmed=true;e.target.textContent='Toca otra vez para borrar';setTimeout(()=>{clearArmed=false;e.target.textContent='Borrar datos de este celular'},4000);return}
   try{localStorage.removeItem(LS)}catch(_){}
-  S.data=null;S.done={};S.pending=[];S.settings={person:'',codes:null,cap:4,sheets:null,rules:null,url:'',pin:''};clearArmed=false;e.target.textContent='Borrar datos de este navegador';render();toast('Datos borrados');
+  S.data=null;S.done={};S.pending=[];S.settings={person:'',codes:null,cap:4,skip:null,rules:null,url:'',pin:''};clearArmed=false;e.target.textContent='Borrar datos de este celular';showGate();toast('Datos borrados');
 });
 
 function card(it){
   const r=it.r, sv=S.saving[it.key];
   const btn=it.rule.id==='verif'
     ?''
-    :`<button class="done-btn" data-done="${esc(it.key)}"${sv==='saving'?' disabled':''}>${sv==='saving'?'Guardando…':'Hecha'}</button>`;
+    :`<button class="done-btn visit-btn" data-done="${esc(it.key)}"${sv==='saving'?' disabled':''}>${sv==='saving'?'Guardando…':'Visita hecha'}</button>`;
   return `<div class="card ${it.status}">
     <div class="name">${esc(r.nombre)}</div>${btn||'<span></span>'}
     <div class="meta"><span class="tag">${esc(it.rule.label)}</span><span class="st ${it.status}">${ST[it.status]}</span>${sv==='error'?'<span class="st overdue">Sin guardar</span>':''}</div>
-    <div class="meta">${r.dir?`<span>${esc(r.dir)}</span>`:''}${r.cel?`<span class="mono">${esc(r.cel)}</span>`:''}<span>HCL <span class="mono">${esc(r.hcl||'—')}</span></span></div>
+    <div class="meta"><span>${r.dir?esc(r.dir):'<i>Sin dirección</i>'}</span><span class="mono">${r.cel?esc(r.cel):'<i>Sin celular</i>'}</span><span>HCL <span class="mono">${esc(r.hcl||'—')}</span></span><button class="linkbtn" data-edit="${esc(r.id)}">Editar datos</button></div>
     <div class="meta">
-      ${r.f.parto!=null?`<span>Parto <span class="mono">${fmtY(r.f.parto)}</span></span>`:`<span>EG ${egTxt(r)}</span><span>FPP <span class="mono">${r.fppCalc!=null?fmtY(r.fppCalc):'—'}</span></span>`}
+      ${r.tipo==='adol'?adolInfo(r,it):r.f.parto!=null?`<span>Parto <span class="mono">${fmtY(r.f.parto)}</span></span>`:`<span>EG ${egTxt(r)}</span><span>FPP <span class="mono">${r.fppCalc!=null?fmtY(r.fppCalc):'—'}</span></span>`}
       <span>Meta <span class="mono">${fmt(it.target)}</span> · plazo <span class="mono">${fmt(it.deadline)}</span></span>
     </div>
-    ${it.rule.id==='verif'?`<div class="partoform"><input type="date" id="pd-${esc(it.key)}" max="${isoOf(T)}" aria-label="Fecha de parto"><button class="done-btn" data-parto="${esc(it.key)}">Registrar parto</button></div>`:''}
+    ${it.rule.id==='verif'?`<div class="partoform"><button class="done-btn visit-btn" data-parto="${esc(it.key)}">Registrar parto</button></div>`:''}
   </div>`;
 }
 const isoOf=d=>{const [y,m,dd]=ymd(d);return `${y}-${String(m+1).padStart(2,'0')}-${String(dd).padStart(2,'0')}`};
@@ -570,7 +923,17 @@ function dayBlock(d,list,C){
   const title=d===T?'Hoy':d===T+1?'Mañana':WDL[dow(d)];
   return `<section class="day"><div class="dayhead"><h2>${title}<span>${dd} de ${MES[m]}</span></h2>
     <div class="row">${a.code?`<span class="turno">${esc(a.code)}</span>`:''}${list.length?`<button class="done-btn" data-copy="${d}">Copiar lista</button>`:''}</div></div>
-    ${list.length?list.map(card).join(''):`<div class="empty">${a.ok?'Sin visitas asignadas':a.nohor?'Este día aún no está en la hoja HORARIO':'Día no disponible en tu horario'}</div>`}</section>`;
+    ${list.length?list.map(card).join(''):(d<T?'':`<div class="empty">${a.ok?'Sin visitas asignadas':a.nohor?'Este día aún no está en la hoja HORARIO':'Día no disponible en tu horario'}</div>`)}
+    ${d<=T?visitedBlock(C,d):''}</section>`;
+}
+function visitedBlock(C,d){
+  const v=visitedOn(C,d);window.__V=window.__V||{};v.forEach(x=>window.__V[x.key]=x);
+  const t=d===T?'Visitadas hoy':'Visitadas este día';
+  return `<div class="visited"><div class="vhead"><b>${t}</b><span class="mono small">${v.length}</span></div>
+    ${v.length?v.map(x=>`<div class="vrow"><div class="vtxt"><b>${esc(x.r.nombre)}</b><span class="small">${esc(x.rule.label)}${x.r.dir?' · '+esc(x.r.dir):''}</span></div>
+      <button class="done-btn delbtn" data-del="${esc(x.key)}"${S.delArmed===x.key?' data-armed="1"':''}>${S.delArmed===x.key?'¿Eliminar? Toca otra vez':'Eliminar'}</button></div>`).join('')
+      :`<p class="small" style="margin:0">Todavía no hay visitas registradas ${d===T?'hoy':'ese día'}.</p>`}
+  </div>`;
 }
 function byDay(items){const m={};for(const it of items)if(it.date!=null)(m[it.date]=m[it.date]||[]).push(it);return m}
 function viewSemana(C){
@@ -578,34 +941,77 @@ function viewSemana(C){
   for(let d=T;d<T+7;d++)if(m[d]||C.avail(d).ok||d===T)h+=dayBlock(d,m[d]||[],C);
   const next=Object.keys(m).map(Number).filter(d=>d>=T+7).sort((a,b)=>a-b)[0];
   if(next!=null)h+=`<p class="small">Siguiente visita después de esta semana: <b>${WDL[dow(next)]} ${fmtY(next)}</b>. Mira la pestaña Mes.</p>`;
-  const lost=C.items.filter(i=>i.date==null).length;
-  if(lost)h+=`<p class="small">${lost} visita(s) sin fecha porque el horario de la hoja aún no cubre esos días. Están en Alertas.</p>`;
+  const nh=C.items.filter(i=>i.status==='nohor').length, od=C.items.filter(i=>i.date==null&&i.status==='overdue').length;
+  if(od)h+=`<p class="small"><b style="color:var(--bad)">${od} visita(s) atrasada(s)</b> sin día GC/APS libre. Revísalas en Alertas.</p>`;
+  if(nh)h+=`<p class="small">${nh} visita(s) esperan el horario del mes siguiente. Están en Alertas.</p>`;
   return h;
 }
+function staffOn(D,d){
+  const g={};
+  for(const p of D.horario.people){const c=p.codes[d];if(!c||c==='L'||c==='VAC')continue;const b=baseCode(c)||c;(g[b]=g[b]||[]).push({name:p.name,prof:p.prof,code:c})}
+  return g;
+}
+function staffBlock(D,d){
+  if(!inHorario(D.horario,d))return '';
+  const g=staffOn(D,d);const order=['GC','APS','C','M','T','MT','CS','ON'];
+  const keys=Object.keys(g).sort((a,b)=>(order.indexOf(a)+1||99)-(order.indexOf(b)+1||99));
+  if(!keys.length)return '';
+  return `<details class="panel staff"><summary>Personal de turno este día</summary>
+    ${keys.map(k=>`<div class="sgrp"><div><b>${esc(k)}</b> <span class="small">· ${g[k].length}</span></div><div class="small">${g[k].map(x=>`${esc(x.name)} <span class="mono">${esc(x.code)}</span> · ${esc(x.prof)}`).join('<br>')}</div></div>`).join('')}
+  </details>`;
+}
 function viewMes(C){
+  const D=C.D, other=S.calPerson&&S.calPerson!==C.person&&D.horario.people.some(p=>p.name===S.calPerson)?S.calPerson:null;
+  if(other){
+    const av=makeAvail(D.horario,other,C.codes);
+    if(!S.calMonth){const [y,mo]=ymd(T);S.calMonth={y,m:mo}}
+    const {y,m:mo}=S.calMonth;const first=dayOf(y,mo,1);const dim=new Date(Date.UTC(y,mo+1,0)).getUTCDate();const lead=(dow(first)+6)%7;
+    let cells=['Lu','Ma','Mi','Ju','Vi','Sá','Do'].map(x=>`<div class="h">${x}</div>`).join('');
+    for(let i=0;i<lead;i++)cells+='<div class="cell blank"></div>';
+    for(let dn=1;dn<=dim;dn++){const d=first+dn-1;const a=av(d);
+      cells+=`<button class="cell${a.ok?'':' off'}${d===T?' today':''}${d===S.selDay?' sel':''}" data-day="${d}" aria-label="${dn}: ${esc(a.code||'sin turno')}"><span class="d">${dn}</span><span class="c big">${a.nohor?'s/h':esc(a.code||'')}</span><span></span></button>`}
+    const a=av(S.selDay);const [,sm,sd]=ymd(S.selDay);
+    return `${personPicker(C,other)}<div class="panel">
+      <div class="row" style="justify-content:space-between"><button data-mnav="-1" aria-label="Mes anterior">‹</button><h2 style="text-transform:capitalize">${MES[mo]} ${y}</h2><button data-mnav="1" aria-label="Mes siguiente">›</button></div>
+      <div class="cal">${cells}</div>
+      <p class="small" style="margin:0">Horario de <b>${esc(other)}</b>. Los días resaltados son ${C.codes.map(esc).join(' / ')}. Solo lectura: tus visitas no cambian.</p>
+    </div>
+    <section class="day"><div class="dayhead"><h2>${WDL[dow(S.selDay)]}<span>${sd} de ${MES[sm]}</span></h2><span class="turno">${a.nohor?'sin horario':esc(a.code||'—')}</span></div>${staffBlock(D,S.selDay)}</section>`;
+  }
   const m=byDay(C.items);
   if(!S.calMonth){const [y,mo]=ymd(T);S.calMonth={y,m:mo}}
   const {y,m:mo}=S.calMonth;const first=dayOf(y,mo,1);const dim=new Date(Date.UTC(y,mo+1,0)).getUTCDate();
   const lead=(dow(first)+6)%7;
   let cells=['Lu','Ma','Mi','Ju','Vi','Sá','Do'].map(x=>`<div class="h">${x}</div>`).join('');
   for(let i=0;i<lead;i++)cells+='<div class="cell blank"></div>';
+  const doneBy={};for(const r of C.recs)for(const ru of VISIT_RULES()){const x=r.f[ru.field];if(x!=null&&x>=first&&x<first+dim)doneBy[x]=(doneBy[x]||0)+1}
   for(let dn=1;dn<=dim;dn++){const d=first+dn-1;const a=C.avail(d);const n=(m[d]||[]).length;const bad=(m[d]||[]).some(i=>i.status==='overdue'||i.status==='late');
-    cells+=`<button class="cell${a.ok?'':' off'}${d===T?' today':''}${d===S.selDay?' sel':''}" data-day="${d}" aria-label="${dn} de ${MES[mo]}, ${n} visitas"><span class="d">${dn}</span><span class="c">${a.nohor?'s/h':esc(a.code||'')}</span>${n?`<span class="k${bad?' bad':''}">${n}</span>`:'<span></span>'}</button>`}
-  return `<div class="panel">
+    cells+=`<button class="cell${a.ok?'':' off'}${d===T?' today':''}${d===S.selDay?' sel':''}" data-day="${d}" aria-label="${dn} de ${MES[mo]}, ${n} visitas programadas, ${doneBy[d]||0} hechas"><span class="d">${dn}${doneBy[d]?`<span class="dn">✓${doneBy[d]}</span>`:''}</span><span class="c">${a.nohor?'s/h':esc(a.code||'')}</span>${n?`<span class="k${bad?' bad':''}">${n}</span>`:'<span></span>'}</button>`}
+  return `${personPicker(C,null)}<div class="panel">
     <div class="row" style="justify-content:space-between"><button data-mnav="-1" aria-label="Mes anterior">‹</button><h2 style="text-transform:capitalize">${MES[mo]} ${y}</h2><button data-mnav="1" aria-label="Mes siguiente">›</button></div>
     <div class="cal">${cells}</div>
-    <div class="legend"><span><i style="background:var(--surface);border:1px solid var(--line)"></i>Disponible</span><span><i style="background:var(--off)"></i>No disponible</span><span><i style="background:var(--bad)"></i>Con atrasos</span><span>s/h = sin horario en la hoja</span></div>
-  </div>${dayBlock(S.selDay,m[S.selDay]||[],C)}`;
+    <div class="legend"><span><i style="background:var(--surface);border:1px solid var(--line)"></i>Disponible</span><span><i style="background:var(--off)"></i>No disponible</span><span><i style="background:var(--bad)"></i>Con atrasos</span><span style="color:var(--ok)">✓ = visitas hechas</span><span>s/h = sin horario en la hoja</span></div>
+  </div>${dayBlock(S.selDay,m[S.selDay]||[],C)}${staffBlock(C.D,S.selDay)}`;
+}
+function personPicker(C,other){
+  const ppl=C.D.horario.people;if(!ppl.length)return '';
+  const groups={};for(const p of ppl)(groups[p.prof||'OTROS']=groups[p.prof||'OTROS']||[]).push(p);
+  return `<label class="f">Ver horario de
+    <select id="calPerson"><option value="">Mi horario (${esc(C.person||'—')}) y mis visitas</option>
+    ${Object.keys(groups).map(g=>`<optgroup label="${esc(g)}">${groups[g].filter(p=>p.name!==C.person).map(p=>`<option value="${esc(p.name)}"${p.name===other?' selected':''}>${esc(p.name)}</option>`).join('')}</optgroup>`).join('')}
+    </select></label>`;
 }
 function viewGest(C){
   const next={};for(const it of C.items){if(it.date==null)continue;if(!next[it.r.id]||it.date<next[it.r.id].date)next[it.r.id]=it}
   const act=C.recs.filter(r=>!C.excluded.some(e=>e.r===r));
   act.sort((a,b)=>(next[a.id]?next[a.id].date:1e9)-(next[b.id]?next[b.id].date:1e9));
-  const q=S.q||'';
-  const list=act.filter(r=>!q||norm(r.nombre+' '+r.dni+' '+r.hcl).includes(norm(q)));
-  return `<input type="search" id="q" placeholder="Buscar por nombre, DNI o HCL" value="${esc(q)}">
-  <div class="list">${list.map(r=>{const n=next[r.id];const etapa=r.f.parto!=null?`Puérpera · parto ${fmtY(r.f.parto)}`:`EG ${egTxt(r)} · FPP ${r.fppCalc!=null?fmtY(r.fppCalc):'—'}`;
-    return `<div class="prow"><div class="t"><b>${esc(r.nombre)}</b><span class="mono small">${esc(r.hcl)}</span></div><div class="s">${etapa}</div><div class="s">${n?`Próxima: <b>${esc(n.rule.label)}</b> el ${WDL[dow(n.date)]} <span class="mono">${fmtY(n.date)}</span>`:'Sin visitas pendientes'}</div></div>`}).join('')||'<div class="empty">Sin resultados</div>'}</div>`;
+  const q=S.q||'', gf=S.gfilter||'todas';
+  const list=act.filter(r=>(gf==='todas'||(gf==='adol')===(r.tipo==='adol'))&&(!q||norm(r.nombre+' '+r.dni+' '+r.hcl+' '+r.cel+' '+r.dir).includes(norm(q))));
+  const nA=act.filter(r=>r.tipo==='adol').length;
+  return `<div class="row" role="radiogroup" aria-label="Filtrar">${[['todas','Todas',act.length],['gest','Gestantes',act.length-nA],['adol','Adolescentes',nA]].map(([v,t,n])=>`<button class="done-btn${gf===v?' primary':''}" data-gf="${v}">${t} <span class="mono">${n}</span></button>`).join('')}</div>
+  <input type="search" id="q" placeholder="Buscar por nombre, DNI, HCL, celular o dirección" value="${esc(q)}">
+  <div class="list">${list.map(r=>{const n=next[r.id];const etapa=r.tipo==='adol'?`Adolescente${r.edad?' · '+esc(r.edad)+' años':''}${r.resp?' · Resp.: '+esc(r.resp):''}`:r.f.parto!=null?`Puérpera · parto ${fmtY(r.f.parto)}`:`EG ${egTxt(r)} · FPP ${r.fppCalc!=null?fmtY(r.fppCalc):'—'}`;
+    return `<div class="prow"><div class="t"><b>${esc(r.nombre)}</b><span class="mono small">${esc(r.hcl)}</span></div><div class="s">${etapa}</div><div class="s">${r.dir?esc(r.dir):'<i>Sin dirección</i>'} · <span class="mono">${r.cel?esc(r.cel):'<i>Sin celular</i>'}</span> · <button class="linkbtn" data-edit="${esc(r.id)}">Editar datos</button></div><div class="s">${n?`Próxima: <b>${esc(n.rule.label)}</b> el ${WDL[dow(n.date)]} <span class="mono">${fmtY(n.date)}</span>`:'Sin visitas pendientes'}</div></div>`}).join('')||'<div class="empty">Sin resultados</div>'}</div>`;
 }
 function viewAlertas(C){
   const ov=C.items.filter(i=>i.status==='overdue').sort((a,b)=>a.deadline-b.deadline);
@@ -616,7 +1022,7 @@ function viewAlertas(C){
   const prow=(name,s)=>`<div class="prow"><b>${esc(name)}</b><div class="s">${s}</div></div>`;
   const local=Object.entries(S.done);
   return [
-    S.pending.length?sec(`Sin guardar en la hoja (${S.pending.length})`,`<div class="list">${S.pending.map(p=>prow(p.label,`hecha el <span class="mono">${fmtY(p.day)}</span>`)).join('')}</div><div class="row"><button class="primary" data-retry="1">Reintentar guardar</button></div>`):'',
+    S.pending.length?sec(`Sin guardar en la hoja (${S.pending.length})`,`<div class="list">${S.pending.map(p=>prow(p.label,p.del?`eliminar la visita del <span class="mono">${fmtY(p.day)}</span>`:p.day!=null?`hecha el <span class="mono">${fmtY(p.day)}</span>`:'cambio de celular/dirección')).join('')}</div><div class="row"><button class="primary" data-retry="1">Reintentar guardar</button></div>`):'',
     sec(`Atrasadas (${ov.length})`,ov.length?`<div class="list">${ov.map(i=>prow(i.r.nombre,`${esc(i.rule.label)} · plazo vencido el <span class="mono">${fmtY(i.deadline)}</span> · ${i.date!=null?`reprogramada al <span class="mono">${fmtY(i.date)}</span>`:'sin día libre en el horario cargado'}`)).join('')}</div>`:'<div class="empty">Nada atrasado</div>'),
     (()=>{const nh=C.items.filter(i=>i.status==='nohor').sort((a,b)=>a.target-b.target);return nh.length?sec(`Esperan el horario del mes siguiente (${nh.length})`,`<p class="small">Se programarán solas cuando agregues ese mes en la hoja HORARIO.</p><div class="list">${nh.map(i=>prow(i.r.nombre,`${esc(i.rule.label)} · meta <span class="mono">${fmtY(i.target)}</span> · plazo <span class="mono">${fmtY(i.deadline)}</span>`)).join('')}</div>`):''})(),
     late.length?sec(`Fuera de plazo por falta de días (${late.length})`,`<div class="list">${late.map(i=>prow(i.r.nombre,`${esc(i.rule.label)} · plazo <span class="mono">${fmtY(i.deadline)}</span>, primer día libre <span class="mono">${i.date!=null?fmtY(i.date):'ninguno'}</span>`)).join('')}</div>`):'',
@@ -629,31 +1035,35 @@ function viewAlertas(C){
 const horMeses=h=>(h.months||[]).map(o=>MES[o.m]+' '+o.y).join(', ')||'ninguno';
 function render(){
   const C=compute();window.__C=C;const D=C.D;
-  $('subtitle').textContent=D.demo?'Visitas domiciliarias programadas según tu horario':`${D.file} · ${C.recs.length} registros`;
+  $('subtitle').textContent=D.demo?'Gestantes y puérperas':`${S.settings.person?S.settings.person.split(' ').slice(-2).join(' ')+' · ':''}${C.recs.length} registros`;
   let b='';
   if(S.err)b+=`<div class="banner err">${esc(S.err)}</div>`;
   if(D.demo)b+=`<div class="banner demo"><b>Datos de ejemplo.</b> Conecta tu hoja de Google para ver tus gestantes reales.</div>`;
   else if(!S.settings.person)b+=`<div class="banner info"><b>Elige tu nombre</b> en Configuración para usar tus turnos.</div>`;
   else{const nh=C.items.filter(i=>i.status==='nohor').length;
+    if(!inHorario(D.horario,T))b+=`<div class="banner demo"><b>La hoja HORARIO no tiene ${MES[ymd(T)[1]]} ${ymd(T)[0]}.</b> Sin ese mes no se programan visitas para estos días.</div>`;
     b+=`<div class="banner info">Horario cargado de la hoja HORARIO: <b>${horMeses(D.horario)}</b>.${nh?` ${nh} visita(s) caen después y esperan el horario del mes siguiente (ver Alertas).`:''}</div>`}
   $('banner').innerHTML=b;
   renderCfg(C);
   const m=byDay(C.items);const wk=Object.keys(m).map(Number).filter(d=>d>=T&&d<T+7).reduce((a,d)=>a+m[d].length,0);
   const nAl=C.items.filter(i=>i.status==='overdue').length+C.alerts.length+S.pending.length;
-  const tabs=[['semana','Esta semana',wk],['mes','Mes',''],['gest','Gestantes',C.recs.length-C.excluded.length],['alertas','Alertas',nAl]];
+  const tabs=[['semana','Esta semana',wk],['mes','Mes',''],['gest','Personas',C.recs.length-C.excluded.length],['alertas','Alertas',nAl]];
   $('tabs').innerHTML=tabs.map(([id,t,n])=>`<button role="tab" aria-selected="${S.tab===id}" data-tab="${id}">${t}${n!==''?`<span class="n">${n}</span>`:''}</button>`).join('');
   $('view').innerHTML=`<div class="day" style="gap:14px">${S.tab==='semana'?viewSemana(C):S.tab==='mes'?viewMes(C):S.tab==='gest'?viewGest(C):viewAlertas(C)}</div>`;
   const q=$('q');if(q)q.addEventListener('input',e=>{S.q=e.target.value;const pos=e.target.selectionStart;render();const n=$('q');n.focus();n.setSelectionRange(pos,pos)});
 }
 document.addEventListener('click',e=>{
-  const t=e.target.closest('[data-tab],[data-done],[data-undo],[data-day],[data-mnav],[data-copy],[data-parto],[data-retry]');if(!t)return;
+  const t=e.target.closest('[data-tab],[data-done],[data-undo],[data-day],[data-mnav],[data-copy],[data-parto],[data-retry],[data-edit],[data-del],[data-gf]');if(!t)return;
+  if(t.dataset.gf){S.gfilter=t.dataset.gf;render();return}
   const C=window.__C;
   if(t.dataset.tab){S.tab=t.dataset.tab;render();return}
-  if(t.dataset.done){const it=C.items.find(i=>i.key===t.dataset.done);if(it)markDone(it,T);return}
-  if(t.dataset.parto){
-    const it=C.items.find(i=>i.key===t.dataset.parto);const v=document.getElementById('pd-'+t.dataset.parto).value;
-    if(!v){toast('Elige la fecha de parto');return}
-    const [y,mo,d]=v.split('-').map(Number);if(it)markDone(it,dayOf(y,mo-1,d));return}
+  if(t.dataset.done){const it=C.items.find(i=>i.key===t.dataset.done);if(it)openSheet(it.r,it,'visita');return}
+  if(t.dataset.parto){const it=C.items.find(i=>i.key===t.dataset.parto);if(it)openSheet(it.r,it,'parto');return}
+  if(t.dataset.del){
+    const k=t.dataset.del, v=(window.__V||{})[k];if(!v)return;
+    if(S.delArmed!==k){S.delArmed=k;render();clearTimeout(S.delTimer);S.delTimer=setTimeout(()=>{if(S.delArmed===k){S.delArmed=null;render()}},4000);return}
+    S.delArmed=null;deleteVisit(v);toast('Visita eliminada. Vuelve a la lista de pendientes.');return}
+  if(t.dataset.edit){const r=C.recs.find(x=>x.id===t.dataset.edit);if(r)openSheet(r,null,'datos');return}
   if(t.dataset.retry){S.err='';S.saving={};flushPending();return}
   if(t.dataset.undo){delete S.done[t.dataset.undo];save();render();return}
   if(t.dataset.day){S.selDay=+t.dataset.day;render();return}
@@ -665,13 +1075,29 @@ document.addEventListener('click',e=>{
     try{navigator.clipboard.writeText(txt).then(()=>toast('Lista copiada para WhatsApp'),fallback)}catch(_){fallback()}
   }
 });
+document.addEventListener('change',e=>{if(e.target.id==='calPerson'){S.calPerson=e.target.value||null;render()}});
 // Volver a leer la hoja al regresar a la app (si pasaron más de 2 minutos)
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&ready()&&Date.now()-((S.data&&S.data.loadedAt)||0)>120000)loadSheet()});
 
+/* ---------- Instalar como app ---------- */
+let installEvt=null;
+const isStandalone=()=>matchMedia('(display-mode: standalone)').matches||navigator.standalone===true;
+function installUI(){
+  const ios=/iphone|ipad|ipod/i.test(navigator.userAgent);
+  $('btnInstall').hidden=!installEvt;
+  $('installHint').textContent=isStandalone()?'La app ya está instalada en este celular.'
+    :installEvt?'Se instala como una app más: con su ícono y sin la barra del navegador.'
+    :ios?'En iPhone: abre esta página en Safari, toca Compartir y luego “Agregar a inicio”.'
+    :'En Android: abre el menú ⋮ de Chrome y elige “Instalar app” o “Agregar a pantalla principal”.';
+}
+addEventListener('beforeinstallprompt',e=>{e.preventDefault();installEvt=e;installUI()});
+addEventListener('appinstalled',()=>{installEvt=null;installUI();toast('App instalada')});
+$('btnInstall').addEventListener('click',async()=>{if(!installEvt)return;installEvt.prompt();await installEvt.userChoice.catch(()=>{});installEvt=null;installUI()});
+if('serviceWorker' in navigator&&/^https?:/.test(location.protocol))navigator.serviceWorker.register('sw.js').catch(()=>{});
+
 (async()=>{
-  render();
-  setConn('off',ready()?'Conectando…':'Sin conectar');
-  if(ready())loadSheet();
+  showGate();installUI();
+  if(ready()&&S.data){render();setConn('busy','Actualizando…');loadSheet()}
 })();
 </script>
 </body>

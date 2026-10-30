@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><defs><clipPath id="c"><rect width="512" height="512" rx="112"/></clipPath></defs><g clip-path="url(#c)"><rect width="512" height="512" fill="#8a2f62"/><circle cx="270" cy="250" r="190" fill="#9c3d72"/><g transform="translate(256 256) scale(1) translate(-256 -256)"><g id="fig">
+  <!-- cabello atrás -->
+  <path d="M168 150 C150 220 150 300 176 352 C196 380 236 372 246 340 L250 240 Z" fill="#3a2131"/>
+  <!-- cabello lado derecho -->
+  <path d="M300 110 C336 128 346 170 336 214 C330 236 318 250 304 256 C318 226 322 196 316 168 Z" fill="#3a2131"/>
+  <!-- vestido con barriga -->
+  <path d="M200 262 C188 300 176 380 168 530 L360 530 C352 500 344 478 340 466 C372 446 392 414 392 376 C392 326 356 292 318 282 C304 272 292 262 282 256 Z" fill="#fde7f0"/>
+  <path d="M318 282 C356 292 392 326 392 376 C392 414 372 446 340 466 C336 456 330 452 324 450 C346 430 356 408 354 378 C352 340 330 306 300 292 Z" fill="#f6c9dc"/>
+  <!-- cuello -->
+  <path d="M236 228 L270 228 L274 262 C262 272 246 272 234 262 Z" fill="#f7cdb6"/>
+  <!-- brazo y manos sobre la barriga -->
+  <path d="M214 280 C204 330 222 372 270 384 C300 390 326 382 336 370" fill="none" stroke="#f9d9e6" stroke-width="30" stroke-linecap="round"/>
+  <ellipse cx="338" cy="366" rx="24" ry="18" fill="#ffe1cf" transform="rotate(-25 338 366)"/>
+  <!-- corazón en la barriga -->
+  <path d="M318 352 C304 342 296 334 296 324 C296 316 302 311 309 311 C313 311 316 313 318 317 C320 313 323 311 327 311 C334 311 340 316 340 324 C340 334 332 342 318 352 Z" fill="#8a2f62"/>
+  <!-- cara -->
+  <path d="M182 168 C182 112 222 84 262 88 C306 92 330 126 326 172 C322 214 292 240 256 240 C214 240 182 212 182 168 Z" fill="#ffe1cf"/>
+  <!-- flequillo y cabello -->
+  <path d="M170 176 C160 104 214 64 264 70 C320 76 344 120 334 168 C322 146 306 128 288 120 C292 136 290 150 284 158 C276 136 258 120 236 116 C238 132 230 148 218 156 C214 140 206 130 196 126 C188 140 180 160 170 176 Z" fill="#3a2131"/>
+  <path d="M232 92 C252 84 278 86 296 96" fill="none" stroke="#6b3b56" stroke-width="7" stroke-linecap="round"/>
+  <!-- ojos -->
+  <ellipse cx="292" cy="182" rx="15" ry="20" fill="#3a2131"/>
+  <ellipse cx="231" cy="182" rx="13" ry="19" fill="#3a2131"/>
+  <circle cx="297" cy="175" r="6" fill="#fff"/><circle cx="235" cy="175" r="5" fill="#fff"/>
+  <circle cx="288" cy="191" r="3" fill="#fff" opacity=".8"/><circle cx="228" cy="191" r="2.5" fill="#fff" opacity=".8"/>
+  <!-- mejillas y boca -->
+  <ellipse cx="312" cy="208" rx="13" ry="7" fill="#f59ab8" opacity=".7"/>
+  <ellipse cx="212" cy="208" rx="12" ry="7" fill="#f59ab8" opacity=".7"/>
+  <path d="M254 214 Q264 223 274 214" fill="none" stroke="#a24a6c" stroke-width="5" stroke-linecap="round"/>
+  <!-- flor en el pelo -->
+  <circle cx="320" cy="112" r="13" fill="#f59ab8"/><circle cx="320" cy="112" r="5" fill="#fff3c4"/>
+</g>
+<circle cx="410" cy="410" r="54" fill="#1f7a55" stroke="#8a2f62" stroke-width="12"/><path d="M384 410 L403 429 L438 392" fill="none" stroke="#fff" stroke-width="16" stroke-linecap="round" stroke-linejoin="round"/></g></g></svg>
