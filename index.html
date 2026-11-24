@@ -269,6 +269,9 @@ input[type=password]{font:inherit;color:var(--ink);background:var(--bg);border:1
       <label class="f">Máximo de visitas por día
         <input type="number" id="cap" min="1" max="30" step="1">
       </label>
+      <label class="f">Máximo en días APS
+        <input type="number" id="capAps" min="1" max="30" step="1">
+      </label>
     </div>
     <div class="f" style="gap:6px">
       <span class="small">Turnos en los que haces visitas (de tu fila del horario)</span>
@@ -332,7 +335,8 @@ const CONFIG = {
   url: '',                              // https://script.google.com/macros/s/…/exec
   persona: 'ROSSANA D. RAVINES COBIAN', // nombre tal como está en la hoja HORARIO
   turnos: ['GC','APS'],                 // turnos en los que se hacen las visitas
-  maxPorDia: 8,                         // máximo de visitas por día
+  maxPorDia: 7,                         // máximo de visitas por día (deja cupo para emergencias)
+  maxPorTurno: { APS: 4 },              // máximo distinto según el turno del día
   semanasInicio: 14,                    // pestaña "Captación": 1ª APN hasta estas semanas
 
   /* Hoja de ADOLESCENTES: su fila de títulos no coincide con los datos,
@@ -508,9 +512,11 @@ function buildItems(recs,rules,T,done,horizon=90){
   }
   return {items,alerts,excluded};
 }
-function schedule(items,avail,cap,T){
-  const load={};
-  const free=d=>avail(d).ok&&(load[d]||0)<cap;
+// preload: visitas ya hechas por día (cuentan para el máximo de ese día)
+function schedule(items,avail,cap,T,preload){
+  const load=Object.assign({},preload||{});
+  const capOf=d=>typeof cap==='function'?cap(d):cap;
+  const free=d=>avail(d).ok&&(load[d]||0)<capOf(d);
   // primero las que todavía pueden hacerse a tiempo (por plazo), después las ya vencidas
   const fixed=items.filter(i=>i.fixed!=null), rest=items.filter(i=>i.fixed==null).sort((a,b)=>((a.deadline<T)-(b.deadline<T))||a.deadline-b.deadline||a.target-b.target);
   for(const it of fixed){it.date=it.fixed;load[it.date]=(load[it.date]||0)+1;it.status='fixed'}
@@ -600,7 +606,11 @@ let S={data:null,settings:{person:'',codes:null,cap:null,skip:null,rules:null,ur
 try{const s=JSON.parse(localStorage.getItem(LS)||'null');if(s){S.data=s.data||null;Object.assign(S.settings,s.settings||{});S.done=s.done||{};S.pending=s.pending||[]}}catch(e){}
 function save(){try{localStorage.setItem(LS,JSON.stringify({data:S.data,settings:S.settings,done:S.done,pending:S.pending}))}catch(e){}}
 // máximo por día: el de CONFIG, salvo que se haya cambiado a mano en Configuración
-const capDia=()=>Math.max(1,+(S.settings.capSet?S.settings.cap:CONFIG.maxPorDia)||8);
+// (los valores guardados de versiones anteriores ya no se usan: capSet → capSet2)
+const capDia=()=>Math.max(1,+(S.settings.capSet2?S.settings.cap:CONFIG.maxPorDia)||7);
+const capAps=()=>Math.max(1,+(S.settings.capApsSet?S.settings.capAps:(CONFIG.maxPorTurno||{}).APS)||4);
+// máximo del día según su turno en HORARIO (APS → 4, resto → 7)
+const capFor=avail=>d=>{const b=baseCode(avail(d).code||'');if(b==='APS')return capAps();const t=(CONFIG.maxPorTurno||{})[b];return t&&b!=='APS'?Math.max(1,+t):capDia()};
 const rules=()=>{const rs=S.settings.rules||DEFAULT_RULES.map(r=>({...r}));
   // reglas guardadas de versiones anteriores: completar las nuevas y actualizar la 2ª visita de adolescentes
   for(const d of DEFAULT_RULES){const i=rs.findIndex(x=>x.id===d.id);if(i<0)rs.push({...d});else if(d.id==='avd2'&&rs[i].base!==d.base)rs[i]={...d}}
@@ -821,7 +831,9 @@ function compute(){
   if(S.settings.adolOff)adol=[];
   const A=buildAdol(adol,rules(),T,S.done,CONFIG.adol);
   items.push(...A.items);excluded.push(...A.excluded);recs.push(...adol);
-  schedule(items,avail,capDia(),T);
+  // Las visitas ya hechas hoy ocupan cupo de hoy: así, al marcar una, no se jala otra del día siguiente
+  const doneToday=countDone(recs,T);
+  schedule(items,avail,capFor(avail),T,{[T]:doneToday});
   return {D,recs,items,alerts,excluded,avail,present,codes,person};
 }
 
@@ -852,7 +864,7 @@ function renderCfg(C){
   const ps=$('person');
   ps.innerHTML='<option value="">— Elige tu nombre —</option>'+D.horario.people.map(p=>`<option value="${esc(p.name)}"${p.name===C.person?' selected':''}>${esc(p.name)} · ${esc(p.prof)}</option>`).join('');
   ps.disabled=D.demo;
-  $('cap').value=capDia();
+  $('cap').value=capDia();$('capAps').value=capAps();
   $('adolResp').value=S.settings.adolOff?'off':(S.settings.adolResp||'todos');
   $('codes').innerHTML=C.present.length?C.present.filter(c=>c!=='VAC').map(c=>`<label class="chip"><input type="checkbox" value="${esc(c)}"${C.codes.includes(c)?' checked':''}>${esc(c)}</label>`).join(''):'<span class="small">Elige tu nombre para ver tus turnos.</span>';
   const skip=S.settings.skip||[];
@@ -861,7 +873,8 @@ function renderCfg(C){
 }
 $('person').addEventListener('change',e=>{S.settings.person=e.target.value;S.settings.codes=null;save();render()});
 $('adolResp').addEventListener('change',e=>{const v=e.target.value;S.settings.adolOff=v==='off';S.settings.adolResp=v==='mios'?'mios':'todos';save();render()});
-$('cap').addEventListener('change',e=>{S.settings.cap=Math.max(1,+e.target.value||1);S.settings.capSet=true;save();render()});
+$('capAps').addEventListener('change',e=>{S.settings.capAps=Math.max(1,+e.target.value||1);S.settings.capApsSet=true;save();render()});
+$('cap').addEventListener('change',e=>{S.settings.cap=Math.max(1,+e.target.value||1);S.settings.capSet2=true;save();render()});
 $('codes').addEventListener('change',()=>{S.settings.codes=[...$('codes').querySelectorAll('input:checked')].map(i=>i.value);save();render()});
 $('sheets').addEventListener('change',()=>{S.settings.skip=[...$('sheets').querySelectorAll('input:not(:checked)')].map(i=>i.value);save();render()});
 $('rules').addEventListener('change',e=>{const i=+e.target.dataset.i,k=e.target.dataset.k;const rs=rules();rs[i][k]=Math.max(0,+e.target.value||0);S.settings.rules=rs;save();render()});
@@ -929,11 +942,12 @@ function card(it){
   </div>`;
 }
 const isoOf=d=>{const [y,m,dd]=ymd(d);return `${y}-${String(m+1).padStart(2,'0')}-${String(dd).padStart(2,'0')}`};
+function countDone(recs,d){let n=0;const fs=rules().filter(r=>r.stage==='g'||r.stage==='p'||r.stage==='a').map(r=>r.field);for(const r of recs)for(const f of fs)if(r.f[f]===d)n++;return n}
 function dayBlock(d,list,C){
   const a=C.avail(d);const [,m,dd]=ymd(d);
   const title=d===T?'Hoy':d===T+1?'Mañana':WDL[dow(d)];
   return `<section class="day"><div class="dayhead"><h2>${title}<span>${dd} de ${MES[m]}</span></h2>
-    <div class="row">${a.code?`<span class="turno">${esc(a.code)}</span>`:''}${list.length?`<button class="done-btn" data-copy="${d}">Copiar lista</button>`:''}</div></div>
+    <div class="row">${d===T&&a.ok?(()=>{const h=countDone(C.recs,T),tot=h+list.length;return `<span class="turno" style="background:var(--ok-soft);color:var(--ok)">${h} de ${tot} hechas</span>`})():''}${a.code?`<span class="turno">${esc(a.code)}</span>`:''}${list.length?`<button class="done-btn" data-copy="${d}">Copiar lista</button>`:''}</div></div>
     ${list.length?list.map(card).join(''):(d<T?'':`<div class="empty">${a.ok?'Sin visitas asignadas':a.nohor?'Este día aún no está en la hoja HORARIO':'Día no disponible en tu horario'}</div>`)}
     ${d<=T?visitedBlock(C,d):''}</section>`;
 }
