@@ -1,6 +1,6 @@
 // Agenda VD Gestantes · service worker
 // Guarda la app para abrirla rápido y sin internet. Los datos de la hoja NO se guardan aquí.
-const VERSION = 'agenda-vd-v14';
+const VERSION = 'agenda-vd-v15';
 const SHELL = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png', './icon-maskable-512.png', './apple-touch-icon.png', './favicon-32.png'];
 
 self.addEventListener('install', e => {
@@ -22,7 +22,7 @@ self.addEventListener('fetch', e => {
     return;
   }
   // íconos, manifiesto y fuentes: copia guardada primero
-  if (url.origin === location.origin || url.hostname.includes('fonts.g')) {
+  if (url.origin === location.origin || url.hostname.includes('fonts.g') || url.hostname === 'cdnjs.cloudflare.com') {
     e.respondWith(caches.match(req).then(hit => hit || fetch(req).then(r => {
       if (r.ok || r.type === 'opaque') { const c = r.clone(); caches.open(VERSION).then(x => x.put(req, c)); }
       return r;
