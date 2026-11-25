@@ -1421,8 +1421,8 @@ function render(){
   const nP=GA.filter(r=>r.fppCalc!=null&&r.fppCalc>=f1&&r.fppCalc<=f2).length;
   const nI=captadas(C).length;
   const nSinU=C.items.filter(i=>i.date===rutaDia(C)&&!locOf(i.r)).length;
-  const tabs=[['semana','Esta semana',wk],['ruta','Ruta',''],['mapa','Mapa 1',nSinU||''],['mes','Mes',''],['partos','Partos del mes',nP],['inicio','Captación ≤'+(CONFIG.semanasInicio||14)+' s',nI],['gest','Personas',C.recs.length-C.excluded.length],['alertas','Alertas',nAl]];
-  $('tabs').innerHTML=tabs.map(([id,t,n])=>`<button role="tab" aria-selected="${S.tab===id}" data-tab="${id}">${t}${n!==''?`<span class="n">${n}</span>`:''}</button>`).join('');
+  const tabs=[['semana','Esta semana',wk],['ruta','Ruta',''],['mapa','Mapa',nSinU||''],['mes','Mes',''],['partos','Partos del mes',nP],['inicio','Captación ≤'+(CONFIG.semanasInicio||14)+' s',nI],['gest','Personas',C.recs.length-C.excluded.length],['alertas','Alertas',nAl]];
+  $('tabs').innerHTML=tabs.map(([id,t,n])=>`<button role="tab" aria-selected="${S.tab===id}" data-tab="${id}">${t}${n!==''?` <span class="n">(${n})</span>`:''}</button>`).join('');
   $('view').innerHTML=`<div class="day" style="gap:14px">${S.tab==='semana'?viewSemana(C):S.tab==='ruta'?viewRuta(C):S.tab==='mapa'?viewMapa(C):S.tab==='mes'?viewMes(C):S.tab==='partos'?viewPartos(C):S.tab==='inicio'?viewInicio(C):S.tab==='gest'?viewGest(C):viewAlertas(C)}</div>`;
   const q=$('q');if(q)q.addEventListener('input',e=>{S.q=e.target.value;const pos=e.target.selectionStart;render();const n=$('q');n.focus();n.setSelectionRange(pos,pos)});
   const mq=$('mq');if(mq)mq.addEventListener('input',e=>{S.mq=e.target.value;const pos=e.target.selectionStart;render();const n=$('mq');n.focus();n.setSelectionRange(pos,pos)});
